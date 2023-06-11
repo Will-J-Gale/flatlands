@@ -1,0 +1,28 @@
+#pragma once
+
+#include <vector>
+#include <memory>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <Vector2.h>
+#include <Entity.h>
+#include <colliders/Collision.h>
+
+class Renderer
+{
+public:
+    Renderer();
+    
+    void render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions);
+    void destroy();
+    bool running();
+    void renderRigidBody(ImDrawList* drawList, const Entity* body);
+    Vector2 getMousePosition();
+
+private:
+    GLFWwindow* window;
+    float dt = 0;
+    Vector2 mousePosition = Vector2(0,0);
+};
