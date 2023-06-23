@@ -20,9 +20,11 @@ public:
     bool running();
     void renderRigidBody(ImDrawList* drawList, const Entity* body);
     Vector2 getMousePosition();
+    ImVec2 toImVec2(Vector2 v);
 
 private:
     GLFWwindow* window;
     float dt = 0;
     Vector2 mousePosition = Vector2(0,0);
+    ImVec2 windowSize = ImVec2(0, 0);
 };

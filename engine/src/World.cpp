@@ -69,27 +69,29 @@ void World::resolveCollisions()
 
         Vector2 direction = (collisionPoints.a - collisionPoints.b).normalize();
         float totalMass = a->invMass + b->invMass;
-        Vector2 penetrationResolution = direction * (collisionPoints.depth / totalMass);
+        Vector2 penetrationResolution = collisionPoints.normal * (collisionPoints.depth / 2.0f);
+        a->transform.position += -penetrationResolution;
+        b->transform.position += penetrationResolution;
 
-        if(!a->isStatic)
-            a->transform.position += -(penetrationResolution * a->invMass);
+        // if(!a->isStatic)
+        //     a->transform.position += -(penetrationResolution * a->invMass);
         
-        if(!b->isStatic)
-            b->transform.position += penetrationResolution * b->invMass;
+        // if(!b->isStatic)
+        //     b->transform.position += penetrationResolution * b->invMass;
 
-        //Collision resolition
-        Vector2 relativeVelocity = a->velocity - b->velocity;
-        float separatingVelocity = Vector2::dot(relativeVelocity, direction);
-        float newSeparatingVelocity = -separatingVelocity * std::min(a->elasticity, b->elasticity);
-        float separatingVelocityDiff = newSeparatingVelocity - separatingVelocity;
-        float impulse = separatingVelocityDiff / totalMass;
-        Vector2 separatingVelocityVector = direction * impulse;
+        // //Collision resolition
+        // Vector2 relativeVelocity = a->velocity - b->velocity;
+        // float separatingVelocity = Vector2::dot(relativeVelocity, direction);
+        // float newSeparatingVelocity = -separatingVelocity * std::min(a->elasticity, b->elasticity);
+        // float separatingVelocityDiff = newSeparatingVelocity - separatingVelocity;
+        // float impulse = separatingVelocityDiff / totalMass;
+        // Vector2 separatingVelocityVector = direction * impulse;
         
-        if(!a->isStatic)
-            a->velocity += (separatingVelocityVector * a->elasticity) * a->invMass;
+        // if(!a->isStatic)
+        //     a->velocity += (separatingVelocityVector * a->elasticity) * a->invMass;
         
-        if(!b->isStatic)
-            b->velocity += (-separatingVelocityVector * b->elasticity) * b->invMass;
+        // if(!b->isStatic)
+        //     b->velocity += (-separatingVelocityVector * b->elasticity) * b->invMass;
     }
 }
 

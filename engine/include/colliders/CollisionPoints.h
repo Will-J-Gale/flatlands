@@ -1,6 +1,7 @@
 #pragma once
 #include <Vector2.h>
 #include <RigidBody.h>
+#include <vector>
 
 struct CollisionPoints 
 {

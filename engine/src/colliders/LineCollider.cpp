@@ -1,6 +1,8 @@
+#include <cmath>
+
 #include <colliders/LineCollider.h>
 #include <colliders/CollisionAlgorithms.h>
-#include <cmath>
+#include <core/Logger.h>
 
 #define PI 3.14159
 
@@ -8,11 +10,11 @@ LineCollider::LineCollider()
 {
 }
 
-LineCollider::LineCollider(Vector2 start, Vector2 end)
+LineCollider::LineCollider(Vector2 position, float width)
 {
-    this->start = start;
-    this->end = end;
-    this->width = Vector2::distance(start, end);
+    _width = width;
+    _start = Vector2(-width / 2.0f, 0.0f);
+    _end = Vector2(width / 2.0f, 0.0f);
 }
 
 CollisionPoints LineCollider::TestCollision(
@@ -28,7 +30,7 @@ CollisionPoints LineCollider::TestCollision(
 		CircleCollider* circleCollider,
 		Transform* circleTransform)
 {
-    return collisionAlgorithms::FindLineCircleCollisionPoints(
+    return CollisionAlgorithms::FindLineCircleCollisionPoints(
         this, transform,
         circleCollider, circleTransform
     );
@@ -39,7 +41,7 @@ CollisionPoints LineCollider::TestCollision(
 		LineCollider* lineCollider,
 		Transform* lineTransform)
 {
-    return collisionAlgorithms::FindLineLineCollisionPoints(
+    return CollisionAlgorithms::FindLineLineCollisionPoints(
         this, transform,
         lineCollider, lineTransform
     );
@@ -50,22 +52,28 @@ CollisionPoints LineCollider::TestCollision(
 		BoxCollider* boxCollider,
 		Transform* boxTransform)
 {
-    return collisionAlgorithms::FindLineBoxCollisionPoints(
+    return CollisionAlgorithms::FindLineBoxCollisionPoints(
         this, transform,
         boxCollider, boxTransform
     );
 }
 
-Line LineCollider::getLine(Vector2 position, float radians)
+std::vector<Vector2> LineCollider::transformPoints(Vector2 position, float radians)
 {
-    Line line;
-    float radius = width / 2.0f;
+    std::vector<Vector2> points;
 
-    line.start.x = position.x + (radius * std::cos(radians));
-    line.start.y = position.y + (radius * std::sin(radians));
+    Vector2 startRotated = _start.rotate(radians) + position;
+    Vector2 endRotated = _end.rotate(radians) + position;
+    points.push_back(endRotated);
+    points.push_back(startRotated);
 
-    line.end.x = position.x + (radius * std::cos(radians + PI));
-    line.end.y = position.y + (radius * std::sin(radians + PI));
+    return points;
+}
 
-    return line;
+Vector2 LineCollider::getAxis(float radians)
+{
+    Vector2 startRotated = _start.rotate(radians);
+    Vector2 endRotated = _end.rotate(radians);
+
+    return endRotated - startRotated;
 }

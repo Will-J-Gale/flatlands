@@ -24,7 +24,7 @@ CollisionPoints CircleCollider::TestCollision(
 		CircleCollider* circleCollider,
 		Transform* circleTransform)
 {
-    return collisionAlgorithms::FindCircleCircleCollisionPoints(
+    return CollisionAlgorithms::FindCircleCircleCollisionPoints(
         this, transform,
         circleCollider, circleTransform
     );
@@ -35,7 +35,7 @@ CollisionPoints CircleCollider::TestCollision(
 		LineCollider* lineCollider,
 		Transform* lineTransform)
 {
-    return collisionAlgorithms::FindLineCircleCollisionPoints(
+    return CollisionAlgorithms::FindLineCircleCollisionPoints(
         lineCollider, lineTransform,
         this, transform
     );
@@ -46,7 +46,7 @@ CollisionPoints CircleCollider::TestCollision(
 		BoxCollider* boxCollider,
 		Transform* boxTransform)
 {
-    return collisionAlgorithms::FindBoxCircleCollision(
+    return CollisionAlgorithms::FindBoxCircleCollision(
         boxCollider, boxTransform,
         this, transform
     );

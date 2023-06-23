@@ -4,5 +4,5 @@
 struct Transform
 {
     Vector2 position;
-    float rotation;
+    float rotation = 0;
 };

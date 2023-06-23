@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 #include "Collider.h"
 #include <colliders/CollisionPoints.h>
@@ -14,6 +15,7 @@ class LineCollider : public Collider
 public:
     LineCollider();
     LineCollider(Vector2 start, Vector2 end);
+    LineCollider(Vector2 position, float width);
 
     CollisionPoints TestCollision(
 		Transform* transform,
@@ -35,9 +37,11 @@ public:
 		BoxCollider* lineCollider,
 		Transform* lineTransform) override;
 
-	Line getLine(Vector2 position, float rotation);
+    std::vector<Vector2> transformPoints(Vector2 position, float radians);
+    Vector2 getAxis(float radians);
 
-    float width = 0;
-    Vector2 start = Vector2(0, 0);
-    Vector2 end = Vector2(0, 0);
+private:
+    float _width = 0;
+    Vector2 _start = Vector2(0, 0);
+    Vector2 _end = Vector2(0, 0);
 };

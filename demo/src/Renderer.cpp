@@ -4,6 +4,7 @@
 #include <colliders/LineCollider.h>
 #include <colliders/BoxCollider.h>
 #include <core/Logger.h>
+#include <colliders/CollisionAlgorithms.h>
 
 inline static void glfw_error_callback(int error, const char* description)
 {
@@ -74,6 +75,7 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
     {
         ImGui::Begin("World");
+        windowSize = ImGui::GetWindowSize();
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -86,15 +88,6 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
         for(std::shared_ptr<Entity>& entity : entities)
         {
             renderRigidBody(drawList, entity.get());
-        }
-
-        for(Collision& collision : *collisions)
-        {
-            
-            ImVec2 aPos = ImVec2(collision.collisionPoints.a.x, collision.collisionPoints.a.y);
-            ImVec2 bPos = ImVec2(collision.collisionPoints.b.x, collision.collisionPoints.b.y);
-            drawList->AddCircleFilled(aPos, 10, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
-            drawList->AddCircleFilled(bPos, 10, ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)));
         }
 
         ImGui::End();
@@ -111,44 +104,51 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
     glfwSwapBuffers(window);
 }
-
+ImVec2 Renderer::toImVec2(Vector2 v)
+{
+    return ImVec2(v.x, v.y);
+}
 void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
 {
+    ImVec2 windowSize = ImGui::GetWindowSize();
+    ImVec2 windowCenter;
+    windowCenter.x = windowSize.x / 2;
+    windowCenter.y = windowSize.y / 2;
+
     Vector2 pos = entity->rigidBody->transform.position;
     
     if(dynamic_cast<CircleCollider*>(entity->collider.get()))
     {
         CircleCollider* circleCollider = (CircleCollider*)entity->collider.get();
         float radius = circleCollider->radius;
-        ImVec2 windowPos = ImGui::GetWindowPos();
+        // ImVec2 windowPos = ImGui::GetWindowPos();
 
-        pos.x += windowPos.x;
-        pos.y += windowPos.y;
+        // pos.x += windowPos.x;
+        // pos.y += windowPos.y;
 
-        drawList->AddCircleFilled(ImVec2(pos.x, pos.y), radius, ImGui::GetColorU32(ImVec4(1.0, 1.0, 1.0, 1.0)));
+        drawList->AddCircleFilled(toImVec2(pos), radius, ImGui::GetColorU32(ImVec4(1.0, 1.0, 1.0, 1.0)));
     }
 
     else if(dynamic_cast<LineCollider*>(entity->collider.get()))
     {
         Transform& transform = entity->rigidBody->transform;
         LineCollider* lineCollider = (LineCollider*)entity->collider.get();
-    
-        ImVec2 start = ImVec2(lineCollider->start.x, lineCollider->start.y);
-        ImVec2 end = ImVec2(lineCollider->end.x, lineCollider->end.y);
 
-        drawList->AddLine(start, end, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
+        std::vector<Vector2> points = lineCollider->transformPoints(transform.position, transform.rotation); 
+
+        drawList->AddLine(toImVec2(points[0]), toImVec2(points[1]), ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
     }
     else if(dynamic_cast<BoxCollider*>(entity->collider.get()))
     {
         Transform& transform = entity->rigidBody->transform;
         BoxCollider* boxCollider = (BoxCollider*) entity->collider.get();
 
-        auto points = boxCollider->getPoints(transform.position, transform.rotation);
+        auto points = boxCollider->transformPoints(transform.position, transform.rotation);
         drawList->AddQuadFilled(
-            ImVec2(points[0].x, points[0].y),
-            ImVec2(points[1].x, points[1].y),
-            ImVec2(points[2].x, points[2].y),
-            ImVec2(points[3].x, points[3].y),
+            toImVec2(points[0]),
+            toImVec2(points[1]),
+            toImVec2(points[2]),
+            toImVec2(points[3]),
             ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f))
         );
     }

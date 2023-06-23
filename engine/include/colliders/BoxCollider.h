@@ -27,10 +27,10 @@ public:
 
     CollisionPoints TestCollision(
 		Transform* transform,
-		BoxCollider* lineCollider,
+		BoxCollider* boxCollider,
 		Transform* lineTransform) override;
-
-    std::vector<Vector2> getPoints(Vector2 position, float rotation);
+    
+    std::vector<Vector2> transformPoints(Vector2 position, float rotation);
     std::vector<Vector2> getAxes(float radians);
 
     float width = 0;

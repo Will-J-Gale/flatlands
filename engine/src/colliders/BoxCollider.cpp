@@ -28,7 +28,7 @@ CollisionPoints BoxCollider::TestCollision(
 		CircleCollider* circleCollider,
 		Transform* circleTransform)
 {
-    return collisionAlgorithms::FindBoxCircleCollision(
+    return CollisionAlgorithms::FindBoxCircleCollision(
         this, transform,
         circleCollider, circleTransform
     );
@@ -39,7 +39,7 @@ CollisionPoints BoxCollider::TestCollision(
 		LineCollider* lineCollider,
 		Transform* lineTransform)
 {
-    return collisionAlgorithms::FindLineBoxCollisionPoints(
+    return CollisionAlgorithms::FindLineBoxCollisionPoints(
         lineCollider, lineTransform,
         this, transform
     );
@@ -50,21 +50,19 @@ CollisionPoints BoxCollider::TestCollision(
 		BoxCollider* boxCollider,
 		Transform* boxTransform)
 {
-    return collisionAlgorithms::FindBoxBoxCollision(
+    return CollisionAlgorithms::FindBoxBoxCollision(
         boxCollider, boxTransform,
         this, transform
     );
 }
 
-std::vector<Vector2> BoxCollider::getPoints(Vector2 position, float radians)
+std::vector<Vector2> BoxCollider::transformPoints(Vector2 position, float radians)
 {
     Vector2 topLeft =   Vector2(-halfWidth, -halfHeight).rotate(radians);
     Vector2 topRight =  Vector2(halfWidth, -halfHeight).rotate(radians);
     Vector2 bottomLeft = Vector2(-halfWidth, halfHeight).rotate(radians);
     Vector2 bottomRight = Vector2(halfWidth, halfHeight).rotate(radians);
 
-    //log({topLeft.x, topLeft.y});
- 
     return {
         topLeft + position, 
         topRight + position, 
@@ -77,11 +75,10 @@ std::vector<Vector2> BoxCollider::getAxes(float radians)
 {
     Vector2 topLeft =   Vector2(-halfWidth, -halfHeight).rotate(radians);
     Vector2 topRight =  Vector2(halfWidth, -halfHeight).rotate(radians);
-    Vector2 bottomLeft = Vector2(-halfWidth, halfHeight).rotate(radians);
     Vector2 bottomRight = Vector2(halfWidth, halfHeight).rotate(radians);
 
-    Vector2 axis1 = topRight - topLeft;
-    Vector2 axis2 = bottomRight - topRight;
+    Vector2 axis1 = (topRight - topLeft).normalize();
+    Vector2 axis2 = (bottomRight - topRight).normalize(); //Normally you would go clockwise for normals but because Y is flipped in this program it makes it weird
 
     return {axis1, axis2};
 }

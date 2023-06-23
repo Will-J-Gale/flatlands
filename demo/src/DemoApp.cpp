@@ -15,16 +15,21 @@ DemoApp::DemoApp()
 
 void DemoApp::run()
 {
+    // createLine(Vector2(100.0f, 100.0f), 100.0f);
+    // createLine(Vector2(100.0f, 125.0f), 100.0f);
+
     createBox(Vector2(100.0f, 100.0f), 200, 100);
-    createBox(Vector2(600.0f, 600.0f), 200, 100);
+    // createBox(Vector2(250.0f, 250.0f), 200, 100);
+
     createCircle(40.0f, Vector2(300.0f, 300.0f), 1.0f, 1.0f);
-    //createCircle(20.0f, Vector2(200.0f, 100.0f), 0.0f, 1.0f);
+    // createCircle(20.0f, Vector2(200.0f, 100.0f), 0.0f, 1.0f);
     //createCircle(40.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f, true);
     //createLine(Vector2(300, 400), Vector2(600, 400));
 
     double dt = 0;
-    float movementSpeed = 100.0f;
-    float angularSpeed = 1.f;
+    float movementSpeed = 10.0f;
+    float angularSpeed = 0.2f;
+    entities[1]->rigidBody->addAngularForce(angularSpeed);
 
     while (renderer.running())
     {
@@ -51,11 +56,11 @@ void DemoApp::run()
         if(ImGui::IsKeyDown(ImGuiKey_E))
             angularForce = angularSpeed;
 
-        if(ImGui::IsMouseDown(0))
-        {
-            float size = rand() % 50;
-            createCircle(size, renderer.getMousePosition(), 1.0f, 1.0f);
-        }
+        // if(ImGui::IsMouseDown(0))
+        // {
+        //     float size = rand() % 50;
+        //     createCircle(size, renderer.getMousePosition(), 1.0f, 1.0f);
+        // }
 
         entities[0]->rigidBody->addForce(force);
         entities[0]->rigidBody->addAngularForce(angularForce);
@@ -84,12 +89,12 @@ void DemoApp::createCircle(float radius, Vector2 position, float mass, float ela
     world.addRigidBody(rigidBody.get());
 }
 
-void DemoApp::createLine(Vector2 start, Vector2 end, bool isStatic)
+void DemoApp::createLine(Vector2 position, float width, bool isStatic)
 {
-    std::shared_ptr<LineCollider> lineCollider = std::make_shared<LineCollider>(start, end);
+    std::shared_ptr<LineCollider> lineCollider = std::make_shared<LineCollider>(position, width);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(lineCollider.get());
     rigidBody->setStatic(isStatic);
-    rigidBody->transform.position = start + ((end - start) / 2);
+    rigidBody->transform.position = position;
 
     std::shared_ptr<Entity> entity = std::make_shared<Entity>();
     entity->rigidBody = rigidBody;
