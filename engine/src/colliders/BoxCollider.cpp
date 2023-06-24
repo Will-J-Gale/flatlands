@@ -16,47 +16,6 @@ BoxCollider::BoxCollider(float width, float height)
     this->halfHeight = height / 2.0f;
 }
 
-CollisionPoints BoxCollider::TestCollision(
-		Transform* transform,
-		Collider* collider,
-		Transform* colliderTransform)
-{
-    return collider->TestCollision(colliderTransform, this, transform);
-}
-
-CollisionPoints BoxCollider::TestCollision(
-		Transform* transform,
-		CircleCollider* circleCollider,
-		Transform* circleTransform)
-{
-    return CollisionAlgorithms::FindBoxCircleCollision(
-        this, transform,
-        circleCollider, circleTransform
-    );
-}
-
-CollisionPoints BoxCollider::TestCollision(
-		Transform* transform,
-		LineCollider* lineCollider,
-		Transform* lineTransform)
-{
-    return CollisionAlgorithms::FindLineBoxCollisionPoints(
-        lineCollider, lineTransform,
-        this, transform
-    );
-}
-
-CollisionPoints BoxCollider::TestCollision(
-		Transform* transform,
-		BoxCollider* boxCollider,
-		Transform* boxTransform)
-{
-    return CollisionAlgorithms::FindBoxBoxCollision(
-        boxCollider, boxTransform,
-        this, transform
-    );
-}
-
 std::vector<Vector2> BoxCollider::transformPoints(Vector2 position, float radians)
 {
     Vector2 topLeft =   Vector2(-halfWidth, -halfHeight).rotate(radians);

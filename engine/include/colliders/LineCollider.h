@@ -17,26 +17,6 @@ public:
     LineCollider(Vector2 start, Vector2 end);
     LineCollider(Vector2 position, float width);
 
-    CollisionPoints TestCollision(
-		Transform* transform,
-		Collider* collider,
-		Transform* colliderTransform) override;
- 
-	CollisionPoints TestCollision(
-		Transform* transform,
-		CircleCollider* circleCollider,
-		Transform* circleTransform) override;
-
-    CollisionPoints TestCollision(
-		Transform* transform,
-		LineCollider* lineCollider,
-		Transform* lineTransform) override;
-	
-	CollisionPoints TestCollision(
-		Transform* transform,
-		BoxCollider* lineCollider,
-		Transform* lineTransform) override;
-
     AABBCollider GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::LINE; }
 

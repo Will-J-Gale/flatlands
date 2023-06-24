@@ -19,11 +19,11 @@ void DemoApp::run()
     // createLine(Vector2(100.0f, 100.0f), 100.0f);
     // createLine(Vector2(100.0f, 125.0f), 100.0f);
 
+    createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f);
     createBox(Vector2(100.0f, 100.0f), 100, 5, 1.0f, 1.0f);
     // createBox(Vector2(250.0f, 250.0f), 200, 100);
     createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.5f, 0.5f, true);
 
-    createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f);
     // createCircle(20.0f, Vector2(200.0f, 100.0f), 0.0f, 1.0f);
     //createCircle(40.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f, true);
     //createLine(Vector2(300, 400), Vector2(600, 400));

@@ -1,8 +1,9 @@
 #include "World.h"
+#include <algorithm>
 #include <colliders/Collision.h>
 #include <colliders/CollisionPoints.h>
 #include <core/Logger.h>
-#include <algorithm>
+#include <colliders/CollisionAlgorithms.h>
 
 World::World(Vector2 gravity, int numIterations)
 {
@@ -59,8 +60,13 @@ void World::detectCollisions()
             RigidBody* a = bodies[i];
             RigidBody* b = bodies[j];
 
-            CollisionPoints collisionPoints = 
-                a->collider->TestCollision(&a->transform, b->collider, &b->transform);
+            // CollisionPoints collisionPoints = 
+            //     a->collider->TestCollision(&a->transform, b->collider, &b->transform);
+
+            CollisionPoints collisionPoints = CollisionAlgorithms::TestCollision(
+                a->collider, &a->transform,
+                b->collider, &b->transform
+            );
 
             if(collisionPoints.hasCollisions)
             {
@@ -77,7 +83,9 @@ void World::detectCollisions()
                     b->transform.position += (penetrationResolution / 2);
                 }
                 
-                collisions.emplace_back(a, b, collisionPoints);
+                Collision collision = Collision(a, b, collisionPoints);
+                // CollisionAlgorithms::FindCollisionPoints(collision);
+                collisions.emplace_back(std::move(collision));
             }
         }
     }

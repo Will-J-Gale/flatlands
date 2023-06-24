@@ -3,6 +3,7 @@
 #include <colliders/CircleCollider.h>
 #include <colliders/LineCollider.h>
 #include <colliders/BoxCollider.h>
+#include <colliders/Collision.h>
 #include <Vector2.h>
 #include <Transform.h>
 #include <core/Logger.h>
@@ -87,7 +88,7 @@ namespace CollisionAlgorithms
         if(distance < radiusCombined)
         {
             //Penetration response
-            Vector2 direction = aTransform->position - bTransform->position;
+            Vector2 direction = bTransform->position - aTransform->position;
             float penetrationDepth = radiusCombined - direction.magnitude();
             Vector2 penetrationResolution = direction.normalize() * (penetrationDepth / 2.0f);
 
@@ -334,4 +335,147 @@ namespace CollisionAlgorithms
         collisionPoints.hasCollisions = true;
         return collisionPoints;
     }
+
+    inline CollisionPoints TestCollision(
+        Collider* aCollider, Transform* aTransform,
+        Collider* bCollider, Transform* bTransform)
+    {
+        ColliderType aType = aCollider->GetType();
+        ColliderType bType = bCollider->GetType();
+
+        if(aType == ColliderType::BOX)
+        {
+            if(bType == ColliderType::BOX)
+            {
+                return FindBoxBoxCollision(
+                    dynamic_cast<BoxCollider*>(aCollider), aTransform, 
+                    dynamic_cast<BoxCollider*>(bCollider), bTransform
+                );
+            }
+            else if(bType == ColliderType::CIRCLE)
+            {
+                return FindBoxCircleCollision(
+                    dynamic_cast<BoxCollider*>(aCollider), aTransform, 
+                    dynamic_cast<CircleCollider*>(bCollider), bTransform
+                );
+            }
+            else
+            {
+                return CollisionPoints();
+            }
+        }
+        else if(aType == ColliderType::CIRCLE)
+        {
+            if(bType == ColliderType::BOX)
+            {
+                CollisionPoints collisionPoints = FindBoxCircleCollision(
+                    dynamic_cast<BoxCollider*>(bCollider), bTransform, 
+                    dynamic_cast<CircleCollider*>(aCollider), aTransform
+                );
+
+                //Flip normal becuase Collision test flipped A and B
+                collisionPoints.normal *= -1;
+                return collisionPoints;
+            }
+            else if(bType == ColliderType::CIRCLE)
+            {
+                return FindCircleCircleCollisionPoints(
+                    dynamic_cast<CircleCollider*>(aCollider), aTransform, 
+                    dynamic_cast<CircleCollider*>(bCollider), bTransform
+                );
+            }
+            else
+            {
+                return CollisionPoints();
+            }
+        }
+        else
+        {
+            //Line
+            return CollisionPoints();
+        }
+    }
+    
+    // inline void FindBoxBoxContactPoints(
+    //     Transform* aTransform, BoxCollider* aCollider,
+    //     Transform* bTransform, BoxCollider* bCollider,
+    //     CollisionPoints& collisionPoints)
+    // {
+
+    // }
+
+    // inline void FindCircleCircleContactPoints(
+    //     Transform* aTransform, CircleCollider* aCollider,
+    //     Transform* bTransform, CircleCollider* bCollider,
+    //     CollisionPoints& collisionPoints)
+    // {
+        
+    // }
+
+    // inline void FindLineLineContactPoints(
+    //     Transform* aTransform, LineCollider* aCollider,
+    //     Transform* bTransform, LineCollider* bCollider,
+    //     CollisionPoints& collisionPoints)
+    // {
+        
+    // }
+
+    // inline void FindCircleBoxContactPoints(
+    //     Transform* aTransform, CircleCollider* aCollider,
+    //     Transform* bTransform, BoxCollider* bCollider,
+    //     CollisionPoints& collisionPoints)
+    // {
+        
+    // }
+
+    // inline void FindCircleLineContactPoints(
+    //     Transform* aTransform, CircleCollider* aCollider,
+    //     Transform* bTransform, LineCollider* bCollider,
+    //     CollisionPoints& collisionPoints)
+    // {
+        
+    // }
+
+    // inline void FindBoxLineContactPoints(
+    //     Transform* aTransform, BoxCollider* aCollider,
+    //     Transform* bTransform, LineCollider* bCollider,
+    //     CollisionPoints& collisionPoints)
+    // {
+        
+    // }
+
+    // inline void FindCollisionPoints(Collision& collision)
+    // {
+    //     ColliderType aType = collision.a->collider->GetType();
+    //     ColliderType bType = collision.a->collider->GetType();
+    //     Transform* aTransform = &collision.a->transform;
+    //     Transform* bTransform = &collision.a->transform;
+    //     Collider* aCollider = collision.a->collider;
+    //     Collider* bCollider = collision.a->collider;
+
+    //     if(aType == ColliderType::BOX)
+    //     {
+    //         if(bType == ColliderType::BOX)
+    //         {
+
+    //         }
+    //         else if(bType == ColliderType::CIRCLE)
+    //         {
+
+    //         }
+    //         else
+    //         {
+                
+    //         }
+    //     }
+    //     else if(aType == ColliderType::CIRCLE)
+    //     {
+
+    //     }
+    //     else
+    //     {
+
+    //     }
+    // }
 }
+
