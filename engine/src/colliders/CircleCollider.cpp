@@ -51,3 +51,11 @@ CollisionPoints CircleCollider::TestCollision(
         this, transform
     );
 }
+
+AABBCollider CircleCollider::GetAABB(Transform* transform)
+{
+    Vector2 min = transform->position - Vector2(radius, radius);
+    Vector2 max = transform->position + Vector2(radius, radius);
+
+    return AABBCollider(min, max);
+}

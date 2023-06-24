@@ -26,3 +26,8 @@ struct Vector2
     float x = 0;
     float y = 0;
 };
+
+inline Vector2 operator* (float scalar, const Vector2 vec)
+{
+    return vec * scalar;
+}

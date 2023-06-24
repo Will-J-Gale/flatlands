@@ -30,6 +30,9 @@ public:
 		BoxCollider* boxCollider,
 		Transform* lineTransform) override;
     
+    AABBCollider GetAABB(Transform* transform) override;
+    
+    //@TODO Change this to just taken in a Transform*
     std::vector<Vector2> transformPoints(Vector2 position, float rotation);
     std::vector<Vector2> getAxes(float radians);
 

@@ -70,6 +70,12 @@ std::vector<Vector2> LineCollider::transformPoints(Vector2 position, float radia
     return points;
 }
 
+
+AABBCollider LineCollider::GetAABB(Transform* transform)
+{
+    return AABBCollider();
+}
+
 Vector2 LineCollider::getAxis(float radians)
 {
     Vector2 startRotated = _start.rotate(radians);

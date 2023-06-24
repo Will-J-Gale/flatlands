@@ -21,7 +21,7 @@ Renderer::Renderer()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
@@ -116,7 +116,18 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
     windowCenter.y = windowSize.y / 2;
 
     Vector2 pos = entity->rigidBody->transform.position;
-    
+
+    AABBCollider aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
+    float width = std::abs(aabb.max.x - aabb.min.x);
+    float height = std::abs(aabb.max.y - aabb.min.y);
+    drawList->AddQuad(
+        toImVec2(aabb.min),
+        toImVec2(aabb.min + Vector2(width, 0)),
+        toImVec2(aabb.max),
+        toImVec2(aabb.min + Vector2(0, height)),
+        ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 1.0f, 0.0f, 1.0f))
+    );
+
     if(dynamic_cast<CircleCollider*>(entity->collider.get()))
     {
         CircleCollider* circleCollider = (CircleCollider*)entity->collider.get();

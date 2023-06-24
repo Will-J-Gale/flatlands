@@ -4,18 +4,18 @@
 
 class Vector2;
 
-inline void log(const std::string& text)
+inline void loginfo(const std::string& text)
 {
     std::cout << text << std::endl;
 }
 
-inline void log(const float& number)
+inline void loginfo(const float& number)
 {
     std::cout << std::to_string(number) << std::endl;
 }
 
 template<typename T>
-inline void log(std::initializer_list<T> numbers)
+inline void loginfo(std::initializer_list<T> numbers)
 {
     std::string text;
 
@@ -25,10 +25,10 @@ inline void log(std::initializer_list<T> numbers)
         text += " ";
     }
 
-    log(text);
+    loginfo(text);
 }
 
-inline void log(Vector2 vector)
+inline void loginfo(Vector2 vector)
 {
     std::string text;
 
@@ -37,5 +37,5 @@ inline void log(Vector2 vector)
     text += std::to_string(vector.y);
     text += " ";
 
-    log(text);
+    loginfo(text);
 }

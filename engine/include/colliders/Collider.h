@@ -1,5 +1,7 @@
 #pragma once
+
 #include <Transform.h>
+#include <colliders/AABBCollider.h>
 
 //Forward declarations
 class CollisionPoints;
@@ -31,4 +33,6 @@ public:
 		Transform* transform,
 		BoxCollider* lineCollider,
 		Transform* lineTransform) = 0;
+    
+    virtual AABBCollider GetAABB(Transform* transform) = 0;
 };

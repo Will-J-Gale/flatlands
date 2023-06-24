@@ -13,15 +13,19 @@ World::World(Vector2 gravity)
 void World::step(float dt)
 {
     resolveCollisions();
+    
     for(RigidBody* body : bodies)
     {
-        body->force += this->gravity * body->mass;
-        body->velocity += body->force;
-        body->velocity *= 1 - body->friction;
-        body->transform.position += (body->velocity * dt);
+        if(body->isStatic)
+            continue;
 
-        body->angularVelocity += body->angularAcceleration;
-        body->angularVelocity *= 1 - body->angularDampening;
+        body->force += this->gravity * dt;
+        body->velocity += body->force * dt;
+        body->velocity *= 1 - body->friction;
+        body->transform.position += body->velocity * dt;
+
+        body->angularVelocity += body->angularAcceleration * dt;
+        body->angularVelocity *= 1 - body->angularDampening * dt;
         body->transform.rotation += (body->angularVelocity * dt);
 
         body->force.set(0.0f, 0.0f);
@@ -67,31 +71,32 @@ void World::resolveCollisions()
         RigidBody* b = collision.b;
         CollisionPoints collisionPoints = collision.collisionPoints;
 
-        Vector2 direction = (collisionPoints.a - collisionPoints.b).normalize();
+        Vector2 penetrationResolution = collisionPoints.normal * collisionPoints.depth;
+
+        if(b->isStatic)
+            a->transform.position += -penetrationResolution;
+        else if(a->isStatic)
+            b->transform.position += penetrationResolution;
+        else
+        {
+            a->transform.position += -penetrationResolution / 2;
+            b->transform.position += penetrationResolution / 2;
+        }
+        
+        //Collision resolition v1
         float totalMass = a->invMass + b->invMass;
-        Vector2 penetrationResolution = collisionPoints.normal * (collisionPoints.depth / 2.0f);
-        a->transform.position += -penetrationResolution;
-        b->transform.position += penetrationResolution;
-
-        // if(!a->isStatic)
-        //     a->transform.position += -(penetrationResolution * a->invMass);
+        Vector2 relativeVelocity = a->velocity - b->velocity;
+        float separatingVelocity = Vector2::dot(relativeVelocity, collisionPoints.normal);
+        float newSeparatingVelocity = -separatingVelocity * std::min(a->restitution, b->restitution);
+        float separatingVelocityDiff = newSeparatingVelocity - separatingVelocity;
+        float impulse = separatingVelocityDiff / totalMass;
+        Vector2 separatingVelocityVector = collisionPoints.normal * impulse;
         
-        // if(!b->isStatic)
-        //     b->transform.position += penetrationResolution * b->invMass;
-
-        // //Collision resolition
-        // Vector2 relativeVelocity = a->velocity - b->velocity;
-        // float separatingVelocity = Vector2::dot(relativeVelocity, direction);
-        // float newSeparatingVelocity = -separatingVelocity * std::min(a->elasticity, b->elasticity);
-        // float separatingVelocityDiff = newSeparatingVelocity - separatingVelocity;
-        // float impulse = separatingVelocityDiff / totalMass;
-        // Vector2 separatingVelocityVector = direction * impulse;
+        if(!a->isStatic)
+            a->velocity += (separatingVelocityVector * a->restitution) * a->invMass;
         
-        // if(!a->isStatic)
-        //     a->velocity += (separatingVelocityVector * a->elasticity) * a->invMass;
-        
-        // if(!b->isStatic)
-        //     b->velocity += (-separatingVelocityVector * b->elasticity) * b->invMass;
+        if(!b->isStatic)
+            b->velocity += (-separatingVelocityVector * b->restitution) * b->invMass;
     }
 }
 

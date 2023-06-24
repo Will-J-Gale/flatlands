@@ -29,5 +29,7 @@ public:
 		BoxCollider* boxCollider,
 		Transform* lineTransform) override;
 
+    AABBCollider GetAABB(Transform* transform) override;
+    
     float radius = 0;
 };

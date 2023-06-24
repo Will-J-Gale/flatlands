@@ -3,16 +3,13 @@
 #include <colliders/CircleCollider.h>
 #include <colliders/LineCollider.h>
 #include <colliders/BoxCollider.h>
-#include <limits>
 #include <Vector2.h>
 #include <Transform.h>
 #include <core/Logger.h>
+#include <core/Math.h>
 
 namespace CollisionAlgorithms
 {
-    const static float FLOAT_MAX = std::numeric_limits<float>::max();
-    const static float FLOAT_MIN = -FLOAT_MAX;
-
     struct AxisProjection
     {
         float min;
@@ -22,8 +19,8 @@ namespace CollisionAlgorithms
     inline AxisProjection projectShapeOntoAxis(Vector2 axis, std::vector<Vector2> shapeVertices)
     {
         AxisProjection projection;
-        projection.min = FLOAT_MAX;
-        projection.max = FLOAT_MIN;
+        projection.min = Math::FLOAT_MAX;
+        projection.max = Math::FLOAT_MIN;
 
         for(Vector2& vertex : shapeVertices)
         {
@@ -62,7 +59,7 @@ namespace CollisionAlgorithms
 
     inline Vector2 getClosestVertexToPoint(Vector2 position, std::vector<Vector2> vertices)
     {
-        float closestDistance = FLOAT_MAX;
+        float closestDistance = Math::FLOAT_MAX;
         Vector2 closestPoint;
 
         for(Vector2 vertex : vertices)
@@ -178,8 +175,6 @@ namespace CollisionAlgorithms
             return collisionPoints;
         }
 
-        log("Collision");
-
         return collisionPoints;
     }
 
@@ -213,7 +208,7 @@ namespace CollisionAlgorithms
         //SAT 2.0
         //Algorithm is a little wonky because Y is flipped from most game engines (Normal up is positive, this down is positive)
         CollisionPoints collisionPoints;
-        collisionPoints.depth = FLOAT_MAX;
+        collisionPoints.depth = Math::FLOAT_MAX;
 
         //Get shape vertices
         std::vector<Vector2> aPoints = a->transformPoints(aTransform->position, aTransform->rotation);
@@ -282,7 +277,7 @@ namespace CollisionAlgorithms
         //SAT 2.0
         //Algorithm is a little wonky because Y is flipped from most game engines (Normal up is positive, this down is positive)
         CollisionPoints collisionPoints;
-        collisionPoints.depth = FLOAT_MAX;
+        collisionPoints.depth = Math::FLOAT_MAX;
 
         //Get shape vertices
         std::vector<Vector2> aPoints = a->transformPoints(aTransform->position, aTransform->rotation);

@@ -1,4 +1,6 @@
+#include <cmath>
 #include "RigidBody.h"
+#include "core/Logger.h"
 
 RigidBody::RigidBody()
 {
@@ -16,9 +18,8 @@ RigidBody::RigidBody(Collider* collider,  float mass, float friction, float elas
     this->setMass(mass);
     this->setFriction(friction);
     this->setStatic(isStatic);
-    this->setElasticity(elasticity);
+    this->setRestitution(elasticity);
 }
-
 
 void RigidBody::addCollider(Collider* collider)
 {
@@ -27,12 +28,12 @@ void RigidBody::addCollider(Collider* collider)
 
 void RigidBody::addForce(Vector2 force)
 {
-    this->force += force;
+    this->force += force / mass;
 }
 
 void RigidBody::addAngularForce(float angularForce)
 {
-    this->angularAcceleration += angularForce;
+    this->angularAcceleration += angularForce / mass;
 }
 
 void RigidBody::setFriction(float friction)
@@ -43,15 +44,19 @@ void RigidBody::setFriction(float friction)
 void RigidBody::setStatic(bool isStatic)
 {
     this->isStatic = isStatic;
+    this->setMass(this->mass);
 }
 
 void RigidBody::setMass(float mass)
 {
-    this->mass = mass;
+    this->mass = std::max(mass, 0.0f);
     this->invMass = mass > 0 ? 1 / mass : 0;
+
+    if(this->isStatic)
+        this->invMass = 0;
 }
 
-void RigidBody::setElasticity(float elasticity)
+void RigidBody::setRestitution(float elasticity)
 {
-    this->elasticity = elasticity;
+    this->restitution = elasticity;
 }

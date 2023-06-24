@@ -37,6 +37,8 @@ public:
 		BoxCollider* lineCollider,
 		Transform* lineTransform) override;
 
+    AABBCollider GetAABB(Transform* transform) override;
+
     std::vector<Vector2> transformPoints(Vector2 position, float radians);
     Vector2 getAxis(float radians);
 
