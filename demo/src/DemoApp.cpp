@@ -8,6 +8,7 @@
 #include <imgui.h>
 #include <Vector2.h>
 #include <cstdlib>
+#include <thread>
 
 DemoApp::DemoApp()
 {
@@ -18,16 +19,16 @@ void DemoApp::run()
     // createLine(Vector2(100.0f, 100.0f), 100.0f);
     // createLine(Vector2(100.0f, 125.0f), 100.0f);
 
-    createBox(Vector2(100.0f, 100.0f), 100, 50, 1.0f, 1.0f);
+    createBox(Vector2(100.0f, 100.0f), 100, 5, 1.0f, 1.0f);
     // createBox(Vector2(250.0f, 250.0f), 200, 100);
-    // createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.5f, 0.5f, true);
+    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.5f, 0.5f, true);
 
     createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f);
     // createCircle(20.0f, Vector2(200.0f, 100.0f), 0.0f, 1.0f);
     //createCircle(40.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f, true);
     //createLine(Vector2(300, 400), Vector2(600, 400));
 
-    float movementSpeed = 1050.0f;
+    float movementSpeed = 50.0f;
     float angularSpeed = 0.5f;
     entities[1]->rigidBody->addAngularForce(angularSpeed);
 
@@ -64,12 +65,12 @@ void DemoApp::run()
         if(ImGui::IsKeyDown(ImGuiKey_E))
             angularForce = angularSpeed;
 
-        if(ImGui::IsMouseDown(0))
+        if(ImGui::IsMouseClicked(0))
         {
             float size = rand() % 50;
             createCircle(size, renderer.getMousePosition(), 1.0f, 1.0f);
         }
-        else if(ImGui::IsMouseDown(1))
+        else if(ImGui::IsMouseClicked(1))
         {
             float width = (rand() % 50) + 10.0f;
             float height = (rand() % 50) + 10.0f;
@@ -79,6 +80,7 @@ void DemoApp::run()
         entities[0]->rigidBody->addForce(force);
         entities[0]->rigidBody->addAngularForce(angularForce);
 
+        //Interesting way of doing fixed timesteps
         while(accumulator > TIME_STEP)
         {
             world.step(TIME_STEP);

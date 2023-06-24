@@ -8,17 +8,20 @@
 class World
 {
 public:
-    World(Vector2 gravity);
+    World(Vector2 gravity, int num_iterations);
     void step(float dt);
     void addRigidBody(RigidBody* rigidBody);
     std::vector<RigidBody*> getBodies();
     std::vector<Collision>* getCollisions();
     
 private:
+    void subStep(float dt);
+    void detectCollisions();
     void resolveCollisions();
 
     std::vector<RigidBody*> bodies;
     std::vector<Collision> collisions;
     Vector2 gravity;
+    int numIterations = 1;
     float dt = 0;
 };

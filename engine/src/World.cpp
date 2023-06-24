@@ -4,39 +4,50 @@
 #include <core/Logger.h>
 #include <algorithm>
 
-World::World(Vector2 gravity)
+World::World(Vector2 gravity, int numIterations)
 {
     this->gravity = gravity;
+    this->numIterations = numIterations;
     collisions = std::vector<Collision>();
 }
 
 void World::step(float dt)
 {
-    resolveCollisions();
-    
+    float dtFraction = dt / numIterations;
+    for(int i = 0; i < numIterations; i++)
+    {
+        subStep(dtFraction);
+    }
+}
+
+void World::subStep(float dt)
+{
     for(RigidBody* body : bodies)
     {
         if(body->isStatic)
             continue;
 
         body->force += this->gravity * dt;
-        body->velocity += body->force * dt;
-        body->velocity *= 1 - body->friction;
+        body->velocity += body->force;
+        // body->velocity *= 1 - body->friction;
         body->transform.position += body->velocity * dt;
 
-        body->angularVelocity += body->angularAcceleration * dt;
-        body->angularVelocity *= 1 - body->angularDampening * dt;
+        body->angularVelocity += body->angularAcceleration;
+        // body->angularVelocity *= 1 - body->angularDampening;
         body->transform.rotation += (body->angularVelocity * dt);
 
         body->force.set(0.0f, 0.0f);
         body->angularAcceleration = 0.0f;
     }
+
+    detectCollisions();
+    resolveCollisions();
 }
 
-void World::resolveCollisions()
+void World::detectCollisions()
 {
     //Detect collisions
-    collisions = std::vector<Collision>();
+    collisions.clear();
 
     for(int i = 0; i < bodies.size(); i++)
     {
@@ -53,16 +64,27 @@ void World::resolveCollisions()
 
             if(collisionPoints.hasCollisions)
             {
-                Collision collision {
-                    a,
-                    b,
-                    collisionPoints
-                };
-                collisions.push_back(collision);
+                //Resolve penetration
+                Vector2 penetrationResolution = collisionPoints.normal * collisionPoints.depth;
+
+                if(b->isStatic)
+                    a->transform.position += -penetrationResolution;
+                else if(a->isStatic)
+                    b->transform.position += penetrationResolution;
+                else
+                {
+                    a->transform.position += (-penetrationResolution / 2);
+                    b->transform.position += (penetrationResolution / 2);
+                }
+                
+                collisions.emplace_back(a, b, collisionPoints);
             }
         }
     }
+}
 
+void World::resolveCollisions()
+{
     //Resolve collisions
     for(Collision& collision : collisions)
     {
@@ -70,18 +92,6 @@ void World::resolveCollisions()
         RigidBody* a = collision.a;
         RigidBody* b = collision.b;
         CollisionPoints collisionPoints = collision.collisionPoints;
-
-        Vector2 penetrationResolution = collisionPoints.normal * collisionPoints.depth;
-
-        if(b->isStatic)
-            a->transform.position += -penetrationResolution;
-        else if(a->isStatic)
-            b->transform.position += penetrationResolution;
-        else
-        {
-            a->transform.position += -penetrationResolution / 2;
-            b->transform.position += penetrationResolution / 2;
-        }
         
         //Collision resolition v1
         float totalMass = a->invMass + b->invMass;

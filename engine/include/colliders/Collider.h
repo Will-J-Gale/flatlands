@@ -9,6 +9,13 @@ class CircleCollider;
 class LineCollider;
 class BoxCollider;
 
+enum class ColliderType
+{
+    BOX,
+    CIRCLE,
+    LINE
+};
+
 class Collider
 {
 public:
@@ -35,4 +42,5 @@ public:
 		Transform* lineTransform) = 0;
     
     virtual AABBCollider GetAABB(Transform* transform) = 0;
+    virtual ColliderType GetType() = 0;
 };

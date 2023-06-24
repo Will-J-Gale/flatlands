@@ -30,6 +30,7 @@ public:
 		Transform* lineTransform) override;
 
     AABBCollider GetAABB(Transform* transform) override;
+    ColliderType GetType() override { return ColliderType::CIRCLE; }
     
     float radius = 0;
 };

@@ -5,9 +5,10 @@
 
 struct CollisionPoints 
 {
-    Vector2 a; //Furthest point of A into B
-    Vector2 b; //Furthest point of B into A
+    int numContacts = 0;
+    Vector2 contactA; //Furthest point of A into B
+    Vector2 contactB; //Furthest point of B into A
     Vector2 normal;
-    float depth;
+    float depth = 0.0f;
     bool hasCollisions = false;
 };
