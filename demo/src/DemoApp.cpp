@@ -9,6 +9,7 @@
 #include <Vector2.h>
 #include <cstdlib>
 #include <thread>
+#include <core/Timer.h>
 
 DemoApp::DemoApp()
 {
@@ -19,16 +20,17 @@ void DemoApp::run()
     // createLine(Vector2(100.0f, 100.0f), 100.0f);
     // createLine(Vector2(100.0f, 125.0f), 100.0f);
 
-    createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f);
-    createBox(Vector2(100.0f, 100.0f), 100, 5, 1.0f, 1.0f);
-    // createBox(Vector2(250.0f, 250.0f), 200, 100);
-    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.5f, 0.5f, true);
+    createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 1.0f, 0.8f);
 
-    // createCircle(20.0f, Vector2(200.0f, 100.0f), 0.0f, 1.0f);
-    //createCircle(40.0f, Vector2(300.0f, 100.0f), 1.0f, 1.0f, true);
-    //createLine(Vector2(300, 400), Vector2(600, 400));
+    // Static boxes
+    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.5f, 0.8f, true);
+    createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.5f, 0.8f, true);
+    createBox(Vector2(1200.0f, 700.0f), 1500, 20, -0.2f, 0.5f, 0.8f, true);
 
-    float movementSpeed = 50.0f;
+    createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 0.8f);
+    createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.8f);
+
+    float movementSpeed = 10.0f;
     float angularSpeed = 0.5f;
     entities[1]->rigidBody->addAngularForce(angularSpeed);
 
@@ -38,6 +40,7 @@ void DemoApp::run()
 
     while (renderer.running())
     {
+        Timer::start("App Loop");
         double newTime = Time::time();
         double frameTime = newTime - currentTime;
         currentTime = newTime;
@@ -68,25 +71,28 @@ void DemoApp::run()
         if(ImGui::IsMouseClicked(0))
         {
             float size = rand() % 50;
-            createCircle(size, renderer.getMousePosition(), 1.0f, 1.0f);
+            createCircle(size, renderer.getMousePosition(), 1.0f, 0.f);
         }
         else if(ImGui::IsMouseClicked(1))
         {
             float width = (rand() % 50) + 10.0f;
             float height = (rand() % 50) + 10.0f;
-            createBox(renderer.getMousePosition(), width, height, 0.1f);
+            createBox(renderer.getMousePosition(), width, height, 0.0f, 0.1f, 0.8f);
         }
 
         entities[0]->rigidBody->addForce(force);
         entities[0]->rigidBody->addAngularForce(angularForce);
 
-        //Interesting way of doing fixed timesteps
-        while(accumulator > TIME_STEP)
-        {
-            world.step(TIME_STEP);
-            accumulator -= TIME_STEP;
-        }
+        // //Interesting way of doing fixed timesteps but becomes slugish after a while
+        // while(accumulator > TIME_STEP)
+        // {
+        //     world.step(TIME_STEP);
+        //     accumulator -= TIME_STEP;
+        // }
 
+        world.step(frameTime);
+
+        Timer::stop("App Loop");
         renderer.render(entities, world.getCollisions());
     }
 }
@@ -123,11 +129,12 @@ void DemoApp::createLine(Vector2 position, float width, bool isStatic)
     world.addRigidBody(rigidBody.get());
 }
 
-void DemoApp::createBox(Vector2 position, float width, float height, float mass, float restitution, bool isStatic)
+void DemoApp::createBox(Vector2 position, float width, float height, float rotation, float mass, float restitution, bool isStatic)
 {
     std::shared_ptr<BoxCollider> boxCollider = std::make_shared<BoxCollider>(width, height);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(boxCollider.get());
     rigidBody->transform.position = position;
+    rigidBody->transform.rotation = rotation;
     rigidBody->setMass(mass);
     rigidBody->setRestitution(restitution);
     rigidBody->setStatic(isStatic);

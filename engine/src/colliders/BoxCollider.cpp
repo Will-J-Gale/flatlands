@@ -16,8 +16,12 @@ BoxCollider::BoxCollider(float width, float height)
     this->halfHeight = height / 2.0f;
 }
 
-std::vector<Vector2> BoxCollider::transformPoints(Vector2 position, float radians)
+std::vector<Vector2> BoxCollider::transformPoints(Transform* transform)
 {
+    Vector2 position = transform->position;
+    float radians = transform->rotation;
+
+    //@TODO precalculate box point so you only need to apply rotation + translation
     Vector2 topLeft =   Vector2(-halfWidth, -halfHeight).rotate(radians);
     Vector2 topRight =  Vector2(halfWidth, -halfHeight).rotate(radians);
     Vector2 bottomLeft = Vector2(-halfWidth, halfHeight).rotate(radians);
@@ -48,7 +52,7 @@ AABBCollider BoxCollider::GetAABB(Transform* transform)
     Vector2 min = Vector2(Math::FLOAT_MAX, Math::FLOAT_MAX);
     Vector2 max = Vector2(Math::FLOAT_MIN, Math::FLOAT_MIN);
 
-    std::vector<Vector2> transformedPoints = transformPoints(transform->position, transform->rotation);
+    std::vector<Vector2> transformedPoints = transformPoints(transform);
 
     for(Vector2& point : transformedPoints)
     {
@@ -67,3 +71,24 @@ AABBCollider BoxCollider::GetAABB(Transform* transform)
 
     return AABBCollider(min, max);
 };
+
+std::vector<Line> BoxCollider::getEdges(Transform* transform)
+{
+    std::vector<Vector2> vertices = transformPoints(transform);
+    std::vector<Line> edges;
+
+    for(int i = 0; i < vertices.size(); i++)
+    {
+        Vector2 v1 = vertices[i];
+        Vector2 v2 = vertices[(i + 1) % vertices.size()];
+
+        edges.push_back(Line(v1, v2));
+    }
+
+    return edges;
+}
+
+float BoxCollider::GetRotationalInertia(float mass)
+{
+    return (1/12) * mass * ((height*height) + (width*width));
+}

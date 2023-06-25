@@ -4,6 +4,7 @@
 #include <colliders/CollisionPoints.h>
 #include <core/Logger.h>
 #include <colliders/CollisionAlgorithms.h>
+#include <core/Timer.h>
 
 World::World(Vector2 gravity, int numIterations)
 {
@@ -14,11 +15,15 @@ World::World(Vector2 gravity, int numIterations)
 
 void World::step(float dt)
 {
+    Timer::start("World Step");
+
     float dtFraction = dt / numIterations;
     for(int i = 0; i < numIterations; i++)
     {
         subStep(dtFraction);
     }
+
+    Timer::stop("World Step");
 }
 
 void World::subStep(float dt)
@@ -41,14 +46,23 @@ void World::subStep(float dt)
         body->angularAcceleration = 0.0f;
     }
 
-    detectCollisions();
+    collisions.clear();
+    std::vector<PotentialCollisionPair> potentialCollisions = broadPhaseDetection();
+    narrowPhaseDetection(potentialCollisions);
+
+    std::string text;
+
+    text += "Potential collisions: ";
+    text += std::to_string(potentialCollisions.size());
+    text += " Actual collisions: ";
+    text += std::to_string(collisions.size());
+
     resolveCollisions();
 }
 
-void World::detectCollisions()
+std::vector<PotentialCollisionPair> World::broadPhaseDetection()
 {
-    //Detect collisions
-    collisions.clear();
+    std::vector<PotentialCollisionPair> potentialCollisions;
 
     for(int i = 0; i < bodies.size(); i++)
     {
@@ -59,34 +73,46 @@ void World::detectCollisions()
 
             RigidBody* a = bodies[i];
             RigidBody* b = bodies[j];
+            AABBCollider aAABB = a->collider->GetAABB(&a->transform);
+            AABBCollider bAABB = b->collider->GetAABB(&b->transform);
 
-            // CollisionPoints collisionPoints = 
-            //     a->collider->TestCollision(&a->transform, b->collider, &b->transform);
+            if(CollisionAlgorithms::TestAABBCollision(&aAABB, &bAABB))
+                potentialCollisions.emplace_back(a, b);
+        }
+    }
 
-            CollisionPoints collisionPoints = CollisionAlgorithms::TestCollision(
-                a->collider, &a->transform,
-                b->collider, &b->transform
-            );
+    return potentialCollisions;
+}
+void World::narrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCollisions)
+{
+    for(PotentialCollisionPair& potentialCollision : potentialCollisions)
+    {
+        RigidBody* a = potentialCollision.a;
+        RigidBody* b = potentialCollision.b;
 
-            if(collisionPoints.hasCollisions)
+        CollisionPoints collisionPoints = CollisionAlgorithms::TestCollision(
+            a->collider, &a->transform,
+            b->collider, &b->transform
+        );
+
+        if(collisionPoints.hasCollisions)
+        {
+            //Resolve penetration
+            Vector2 penetrationResolution = collisionPoints.normal * collisionPoints.depth;
+
+            if(b->isStatic)
+                a->transform.position += -penetrationResolution;
+            else if(a->isStatic)
+                b->transform.position += penetrationResolution;
+            else
             {
-                //Resolve penetration
-                Vector2 penetrationResolution = collisionPoints.normal * collisionPoints.depth;
-
-                if(b->isStatic)
-                    a->transform.position += -penetrationResolution;
-                else if(a->isStatic)
-                    b->transform.position += penetrationResolution;
-                else
-                {
-                    a->transform.position += (-penetrationResolution / 2);
-                    b->transform.position += (penetrationResolution / 2);
-                }
-                
-                Collision collision = Collision(a, b, collisionPoints);
-                // CollisionAlgorithms::FindCollisionPoints(collision);
-                collisions.emplace_back(std::move(collision));
+                a->transform.position += (-penetrationResolution / 2);
+                b->transform.position += (penetrationResolution / 2);
             }
+
+            Collision collision = Collision(a, b, collisionPoints);
+            CollisionAlgorithms::GenerateContactPoints(collision);
+            collisions.emplace_back(std::move(collision));
         }
     }
 }

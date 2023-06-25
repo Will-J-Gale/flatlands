@@ -3,12 +3,7 @@
 
 #include "Collider.h"
 #include <colliders/CollisionPoints.h>
-
-struct Line
-{
-	Vector2 start;
-	Vector2 end;
-};
+#include <Line.h>
 
 class LineCollider : public Collider
 {
@@ -19,8 +14,9 @@ public:
 
     AABBCollider GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::LINE; }
+    float GetRotationalInertia(float mass) override;
 
-    std::vector<Vector2> transformPoints(Vector2 position, float radians);
+    std::vector<Vector2> transformPoints(Transform* transform);
     Vector2 getAxis(float radians);
 
 private:

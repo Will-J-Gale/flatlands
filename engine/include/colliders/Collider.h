@@ -22,4 +22,5 @@ public:
     Collider(){};
     virtual AABBCollider GetAABB(Transform* transform) = 0;
     virtual ColliderType GetType() = 0;
+    virtual float GetRotationalInertia(float mass) = 0;
 };

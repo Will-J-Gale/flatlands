@@ -25,10 +25,12 @@ public:
 
     Transform transform;
     Collider* collider;
-    float mass = 1;
+    float mass = 1.0f;
+    float invMass = 1.0f;
+    float rotationalInertia = 1.0f;
+    float invRotationalInertia = 1.0f;
     float friction = 0.01f;
     float angularDampening = 0.01f;
     bool isStatic = false;
     float restitution = 1.0f;
-    float invMass = 1.0f;
 };

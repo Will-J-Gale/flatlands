@@ -5,6 +5,7 @@
 #include <colliders/BoxCollider.h>
 #include <colliders/Collision.h>
 #include <Vector2.h>
+#include <Line.h>
 #include <Transform.h>
 #include <core/Logger.h>
 #include <core/Math.h>
@@ -74,6 +75,14 @@ namespace CollisionAlgorithms
         }
 
         return closestPoint;
+    }
+
+    inline bool TestAABBCollision(AABBCollider* a, AABBCollider* b)
+    {
+        return a->max.x > b->min.x &&
+			a->min.x < b->max.x &&
+			a->max.y > b->min.y &&
+			a->min.y < b->max.y;
     }
 
     inline CollisionPoints FindCircleCircleCollisionPoints(
@@ -149,8 +158,8 @@ namespace CollisionAlgorithms
         collisionPoints.hasCollisions = true;
         AxisProjection projection1, projection2;
 
-        auto aPoints = a->transformPoints(aTransform->position, aTransform->rotation);
-        auto bPoints = b->transformPoints(bTransform->position, bTransform->rotation);
+        auto aPoints = a->transformPoints(aTransform);
+        auto bPoints = b->transformPoints(bTransform);
 
         auto aAxis = a->getAxis(aTransform->rotation).normal();
         auto bAxis = b->getAxis(bTransform->rotation).normal();
@@ -212,8 +221,8 @@ namespace CollisionAlgorithms
         collisionPoints.depth = Math::FLOAT_MAX;
 
         //Get shape vertices
-        std::vector<Vector2> aPoints = a->transformPoints(aTransform->position, aTransform->rotation);
-        std::vector<Vector2> bPoints = b->transformPoints(bTransform->position, bTransform->rotation);
+        std::vector<Vector2> aPoints = a->transformPoints(aTransform);
+        std::vector<Vector2> bPoints = b->transformPoints(bTransform);
 
         std::vector<Vector2> aAxes = a->getAxes(aTransform->rotation);
         std::vector<Vector2> bAxes = b->getAxes(bTransform->rotation);
@@ -281,7 +290,7 @@ namespace CollisionAlgorithms
         collisionPoints.depth = Math::FLOAT_MAX;
 
         //Get shape vertices
-        std::vector<Vector2> aPoints = a->transformPoints(aTransform->position, aTransform->rotation);
+        std::vector<Vector2> aPoints = a->transformPoints(aTransform);
         std::vector<Vector2> aAxes = a->getAxes(aTransform->rotation);
 
         for(Vector2& axis : aAxes)
@@ -348,15 +357,15 @@ namespace CollisionAlgorithms
             if(bType == ColliderType::BOX)
             {
                 return FindBoxBoxCollision(
-                    dynamic_cast<BoxCollider*>(aCollider), aTransform, 
-                    dynamic_cast<BoxCollider*>(bCollider), bTransform
+                    static_cast<BoxCollider*>(aCollider), aTransform, 
+                    static_cast<BoxCollider*>(bCollider), bTransform
                 );
             }
             else if(bType == ColliderType::CIRCLE)
             {
                 return FindBoxCircleCollision(
-                    dynamic_cast<BoxCollider*>(aCollider), aTransform, 
-                    dynamic_cast<CircleCollider*>(bCollider), bTransform
+                    static_cast<BoxCollider*>(aCollider), aTransform, 
+                    static_cast<CircleCollider*>(bCollider), bTransform
                 );
             }
             else
@@ -369,8 +378,8 @@ namespace CollisionAlgorithms
             if(bType == ColliderType::BOX)
             {
                 CollisionPoints collisionPoints = FindBoxCircleCollision(
-                    dynamic_cast<BoxCollider*>(bCollider), bTransform, 
-                    dynamic_cast<CircleCollider*>(aCollider), aTransform
+                    static_cast<BoxCollider*>(bCollider), bTransform, 
+                    static_cast<CircleCollider*>(aCollider), aTransform
                 );
 
                 //Flip normal becuase Collision test flipped A and B
@@ -380,8 +389,8 @@ namespace CollisionAlgorithms
             else if(bType == ColliderType::CIRCLE)
             {
                 return FindCircleCircleCollisionPoints(
-                    dynamic_cast<CircleCollider*>(aCollider), aTransform, 
-                    dynamic_cast<CircleCollider*>(bCollider), bTransform
+                    static_cast<CircleCollider*>(aCollider), aTransform, 
+                    static_cast<CircleCollider*>(bCollider), bTransform
                 );
             }
             else
@@ -395,87 +404,190 @@ namespace CollisionAlgorithms
             return CollisionPoints();
         }
     }
-    
-    // inline void FindBoxBoxContactPoints(
-    //     Transform* aTransform, BoxCollider* aCollider,
-    //     Transform* bTransform, BoxCollider* bCollider,
-    //     CollisionPoints& collisionPoints)
-    // {
 
-    // }
+    inline void GenerateBoxBoxContactPoints(
+        BoxCollider* aCollider, Transform* aTransform,
+        BoxCollider* bCollider, Transform* bTransform, 
+        CollisionPoints& collisionPoints)
+    {
+        std::vector<Vector2> aPoints = aCollider->transformPoints(aTransform);
+        std::vector<Vector2> bPoints = bCollider->transformPoints(bTransform);
+        std::vector<Line> aEdges = aCollider->getEdges(aTransform);
+        std::vector<Line> bEdges = bCollider->getEdges(bTransform);
 
-    // inline void FindCircleCircleContactPoints(
-    //     Transform* aTransform, CircleCollider* aCollider,
-    //     Transform* bTransform, CircleCollider* bCollider,
-    //     CollisionPoints& collisionPoints)
-    // {
+        int contactCount = 0;
+        float closestDistance = Math::FLOAT_MAX;
+        Vector2 contact1, contact2;
+
+        for(Vector2& vertex : aPoints)
+        {
+            for(Line edge : bEdges)
+            {
+                Vector2 pointOnLine = edge.closestPointOnLine(vertex);                
+                float distance = Vector2::distanceSquared(pointOnLine, vertex);
+
+                if(Math::nearlyEqual(distance, closestDistance))
+                {
+                    if(!Vector2::nearlyEqual(pointOnLine, contact1))
+                    {
+                        contact2 = pointOnLine;
+                        contactCount = 2;
+                    }
+                }
+                else if(distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    contact1 = pointOnLine;
+                    contactCount = 1;
+                }
+            }
+        }
+
+        for(Vector2& vertex : bPoints)
+        {
+            for(Line edge : aEdges)
+            {
+                Vector2 pointOnLine = edge.closestPointOnLine(vertex);                
+                float distance = Vector2::distanceSquared(pointOnLine, vertex);
+
+                if(Math::nearlyEqual(distance, closestDistance))
+                {
+                    if(!Vector2::nearlyEqual(pointOnLine, contact1))
+                    {
+                        contact2 = pointOnLine;
+                        contactCount = 2;
+                    }
+                }
+                else if(distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    contact1 = pointOnLine;
+                    contactCount = 1;
+                }
+            }
+        }
+
+        collisionPoints.contacts.emplace_back(std::move(contact1));
+
+        if(contactCount == 2)
+            collisionPoints.contacts.emplace_back(std::move(contact2));
+    }
+
+    inline void GenerateCircleCircleContactPoints(
+        CircleCollider* aCollider, Transform* aTransform,
+        CircleCollider* bCollider, Transform* bTransform,
+        CollisionPoints& collisionPoints)
+    {
+        Vector2 dir = (bTransform->position - aTransform->position).normalize();
+        Vector2 contact = aTransform->position + (dir * aCollider->radius);
+        collisionPoints.contacts.emplace_back(std::move(contact));
+    }
+
+    inline void GenerateLineLineContactPoints(
+        LineCollider* aCollider, Transform* aTransform, 
+        LineCollider* bCollider, Transform* bTransform, 
+        CollisionPoints& collisionPoints)
+    {
         
-    // }
+    }
 
-    // inline void FindLineLineContactPoints(
-    //     Transform* aTransform, LineCollider* aCollider,
-    //     Transform* bTransform, LineCollider* bCollider,
-    //     CollisionPoints& collisionPoints)
-    // {
+    inline void GenerateCircleBoxContactPoints(
+        CircleCollider* aCollider, Transform* aTransform, 
+        BoxCollider* bCollider, Transform* bTransform, 
+        CollisionPoints& collisionPoints)
+    {
+        Vector2 contactPoint;
+        float closestDistance = Math::FLOAT_MAX;
+
+        for(Line& edge : bCollider->getEdges(bTransform))
+        {
+            Vector2 pointOnLine = edge.closestPointOnLine(aTransform->position);
+            float distanceSquared = Vector2::distanceSquared(pointOnLine, aTransform->position);
+
+            if(distanceSquared < closestDistance)
+            {
+                closestDistance = distanceSquared;
+                contactPoint = pointOnLine;
+            }
+        }
+
+        collisionPoints.contacts.emplace_back(std::move(contactPoint));
+    }
+
+    inline void GenerateCircleLineContactPoints(
+        CircleCollider* aCollider, Transform* aTransform, 
+        LineCollider* bCollider, Transform* bTransform,
+        CollisionPoints& collisionPoints)
+    {
         
-    // }
+    }
 
-    // inline void FindCircleBoxContactPoints(
-    //     Transform* aTransform, CircleCollider* aCollider,
-    //     Transform* bTransform, BoxCollider* bCollider,
-    //     CollisionPoints& collisionPoints)
-    // {
+    inline void GenerateBoxLineContactPoints(
+        BoxCollider* aCollider, Transform* aTransform,
+        LineCollider* bCollider, Transform* bTransform,
+        CollisionPoints& collisionPoints)
+    {
         
-    // }
+    }
 
-    // inline void FindCircleLineContactPoints(
-    //     Transform* aTransform, CircleCollider* aCollider,
-    //     Transform* bTransform, LineCollider* bCollider,
-    //     CollisionPoints& collisionPoints)
-    // {
-        
-    // }
+    inline void GenerateContactPoints(Collision& collision)
+    {
+        ColliderType aType = collision.a->collider->GetType();
+        ColliderType bType = collision.b->collider->GetType();
+        Transform* aTransform = &collision.a->transform;
+        Transform* bTransform = &collision.b->transform;
+        Collider* aCollider = collision.a->collider;
+        Collider* bCollider = collision.b->collider;
 
-    // inline void FindBoxLineContactPoints(
-    //     Transform* aTransform, BoxCollider* aCollider,
-    //     Transform* bTransform, LineCollider* bCollider,
-    //     CollisionPoints& collisionPoints)
-    // {
-        
-    // }
-
-    // inline void FindCollisionPoints(Collision& collision)
-    // {
-    //     ColliderType aType = collision.a->collider->GetType();
-    //     ColliderType bType = collision.a->collider->GetType();
-    //     Transform* aTransform = &collision.a->transform;
-    //     Transform* bTransform = &collision.a->transform;
-    //     Collider* aCollider = collision.a->collider;
-    //     Collider* bCollider = collision.a->collider;
-
-    //     if(aType == ColliderType::BOX)
-    //     {
-    //         if(bType == ColliderType::BOX)
-    //         {
-
-    //         }
-    //         else if(bType == ColliderType::CIRCLE)
-    //         {
-
-    //         }
-    //         else
-    //         {
-                
-    //         }
-    //     }
-    //     else if(aType == ColliderType::CIRCLE)
-    //     {
-
-    //     }
-    //     else
-    //     {
-
-    //     }
-    // }
+        if(aType == ColliderType::BOX)
+        {
+            if(bType == ColliderType::BOX)
+            {
+                GenerateBoxBoxContactPoints(
+                    static_cast<BoxCollider*>(aCollider), aTransform,
+                    static_cast<BoxCollider*>(bCollider), bTransform,
+                    collision.collisionPoints
+                );
+            }
+            else if(bType == ColliderType::CIRCLE)
+            {
+                GenerateCircleBoxContactPoints(
+                    static_cast<CircleCollider*>(bCollider), bTransform,
+                    static_cast<BoxCollider*>(aCollider), aTransform,
+                    collision.collisionPoints
+                );
+            }
+            else
+            {
+                //@TODO 
+            }
+        }
+        else if(aType == ColliderType::CIRCLE)
+        {
+            if(bType == ColliderType::BOX)
+            {
+                GenerateCircleBoxContactPoints(
+                    static_cast<CircleCollider*>(aCollider), aTransform,
+                    static_cast<BoxCollider*>(bCollider), bTransform,
+                    collision.collisionPoints
+                ); 
+            }
+            else if(bType == ColliderType::CIRCLE)
+            {
+                GenerateCircleCircleContactPoints(
+                    static_cast<CircleCollider*>(aCollider), aTransform,
+                    static_cast<CircleCollider*>(bCollider), bTransform,
+                    collision.collisionPoints
+                );
+            }
+            else
+            {
+                //@TODO 
+            }
+        }
+        else
+        {
+            //@TODO 
+        }
+    }
 }
-

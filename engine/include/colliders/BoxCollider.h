@@ -3,6 +3,7 @@
 #include <colliders/Collider.h>
 #include <colliders/CollisionPoints.h>
 #include <Vector2.h>
+#include <Line.h>
 
 class BoxCollider : public Collider
 {
@@ -13,9 +14,10 @@ public:
     AABBCollider GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::BOX; }
     
-    //@TODO Change this to just taken in a Transform*
-    std::vector<Vector2> transformPoints(Vector2 position, float rotation);
+    std::vector<Vector2> transformPoints(Transform* transform);
     std::vector<Vector2> getAxes(float radians);
+    std::vector<Line> getEdges(Transform* transform);
+    float GetRotationalInertia(float mass) override;
 
     float width = 0;
     float height = 0;

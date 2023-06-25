@@ -50,10 +50,22 @@ void RigidBody::setStatic(bool isStatic)
 void RigidBody::setMass(float mass)
 {
     this->mass = std::max(mass, 0.0f);
-    this->invMass = mass > 0 ? 1 / mass : 0;
+    this->invMass = mass > 0 ? 1 / mass : 0.0f;
+    
+    this->rotationalInertia = collider->GetRotationalInertia(this->mass);
+    this->invRotationalInertia = this->rotationalInertia > 0 ? 1.0f / rotationalInertia : 0.0f;
+
+    if(this->mass == 0.0f)
+    {
+        this->isStatic = true;
+        this->rotationalInertia = 0.0f;
+    }
 
     if(this->isStatic)
-        this->invMass = 0;
+    {
+        this->invMass = 0.0f;
+        this->invRotationalInertia = 0.0f;
+    }
 }
 
 void RigidBody::setRestitution(float elasticity)

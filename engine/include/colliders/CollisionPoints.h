@@ -5,7 +5,7 @@
 
 struct CollisionPoints 
 {
-    int numContacts = 0;
+    std::vector<Vector2> contacts;
     Vector2 contactA; //Furthest point of A into B
     Vector2 contactB; //Furthest point of B into A
     Vector2 normal;

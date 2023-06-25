@@ -1,4 +1,5 @@
 #pragma once
+#include <core/Math.h>
 
 struct Vector2
 {
@@ -16,12 +17,18 @@ struct Vector2
     void operator*= (float scalar);
     Vector2 operator* (float scalar) const;
     Vector2 operator/ (float scalar) const;
+    bool operator==(const Vector2& vec) const;
+    bool operator!=(const Vector2& vec) const;
     float magnitude();
     Vector2 normalize();
     Vector2 normal();
     Vector2 rotate(float radians);
+    float length();
+    float lengthSquared();
     static float dot(Vector2& a, Vector2& b);
     static float distance(const Vector2& a, const Vector2& b);
+    static float distanceSquared(const Vector2& a, const Vector2& b);
+    static bool nearlyEqual(const Vector2& a, const Vector2& b, float epsilon=Math::EPSILON);
 
     float x = 0;
     float y = 0;

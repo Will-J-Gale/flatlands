@@ -5,6 +5,8 @@
 #include <colliders/BoxCollider.h>
 #include <core/Logger.h>
 #include <colliders/CollisionAlgorithms.h>
+#include <Constants.h>
+#include <core/Timer.h>
 
 inline static void glfw_error_callback(int error, const char* description)
 {
@@ -44,6 +46,7 @@ Renderer::Renderer()
 
 void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions)
 {
+    Timer::start("Render");
     bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
@@ -65,14 +68,6 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
 
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-    {
-        ImGui::Begin("FPS");                          // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
-    }
-
     {
         ImGui::Begin("World");
         windowSize = ImGui::GetWindowSize();
@@ -90,9 +85,41 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
             renderRigidBody(drawList, entity.get());
         }
 
+        for(Collision& collision : *collisions)
+        {
+            if(collision.collisionPoints.contacts.size() > 0)
+            {
+                for(Vector2 contact : collision.collisionPoints.contacts)
+                {
+                    drawList->AddCircleFilled(toImVec2(contact), 10.0f, GREEN);
+                }
+            }
+        }
+
         ImGui::End();
     }
 
+    Timer::stop("Render");
+    {
+        ImGui::Begin("Metrics");                          // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Entities: %li", entities.size());
+        ImGui::Spacing();
+        
+        ImGui::Text("Timings");
+        for(std::pair<std::string, Timespan> timer : Timer::timers)
+        {
+            std::string text;
+            text += timer.first;
+            text += ": ";
+            text += std::to_string(timer.second.getDuration());
+            ImGui::Text(text.c_str());
+        }
+        ImGui::End();
+    }
+
+    Timer::start("Post-Render");
     // Rendering
     ImGui::Render();
     int display_w, display_h;
@@ -103,6 +130,7 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
+    Timer::stop("Post-Render");
 }
 ImVec2 Renderer::toImVec2(Vector2 v)
 {
@@ -125,7 +153,7 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         toImVec2(aabb.min + Vector2(width, 0)),
         toImVec2(aabb.max),
         toImVec2(aabb.min + Vector2(0, height)),
-        ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 1.0f, 0.0f, 1.0f))
+        GREEN
     );
 
     if(dynamic_cast<CircleCollider*>(entity->collider.get()))
@@ -137,7 +165,7 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         // pos.x += windowPos.x;
         // pos.y += windowPos.y;
 
-        drawList->AddCircleFilled(toImVec2(pos), radius, ImGui::GetColorU32(ImVec4(1.0, 1.0, 1.0, 1.0)));
+        drawList->AddCircleFilled(toImVec2(pos), radius, WHITE);
     }
 
     else if(dynamic_cast<LineCollider*>(entity->collider.get()))
@@ -145,22 +173,22 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         Transform& transform = entity->rigidBody->transform;
         LineCollider* lineCollider = (LineCollider*)entity->collider.get();
 
-        std::vector<Vector2> points = lineCollider->transformPoints(transform.position, transform.rotation); 
+        std::vector<Vector2> points = lineCollider->transformPoints(&transform); 
 
-        drawList->AddLine(toImVec2(points[0]), toImVec2(points[1]), ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
+        drawList->AddLine(toImVec2(points[0]), toImVec2(points[1]), WHITE);
     }
     else if(dynamic_cast<BoxCollider*>(entity->collider.get()))
     {
         Transform& transform = entity->rigidBody->transform;
         BoxCollider* boxCollider = (BoxCollider*) entity->collider.get();
 
-        auto points = boxCollider->transformPoints(transform.position, transform.rotation);
+        auto points = boxCollider->transformPoints(&transform);
         drawList->AddQuadFilled(
             toImVec2(points[0]),
             toImVec2(points[1]),
             toImVec2(points[2]),
             toImVec2(points[3]),
-            ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f))
+            WHITE
         );
     }
 }

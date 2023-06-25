@@ -18,3 +18,8 @@ AABBCollider CircleCollider::GetAABB(Transform* transform)
 
     return AABBCollider(min, max);
 }
+
+float CircleCollider::GetRotationalInertia(float mass)
+{
+    return 0.5 * mass * (radius * radius);
+}

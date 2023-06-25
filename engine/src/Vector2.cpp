@@ -83,6 +83,15 @@ Vector2 Vector2::operator/(float scalar) const
         y / scalar
     ); 
 }
+bool Vector2::operator==(const Vector2& vec) const
+{
+    return (x == vec.x) && (y == vec.y);
+}
+
+bool Vector2::operator!=(const Vector2& vec) const
+{
+    return (x != vec.x) && (y != vec.y);
+}
 
 float Vector2::magnitude()
 {
@@ -118,6 +127,14 @@ float Vector2::distance(const Vector2& a, const Vector2& b)
     return sqrt((dx * dx) + (dy * dy));
 }
 
+float Vector2::distanceSquared(const Vector2& a, const Vector2& b)
+{
+    float dx = a.x - b.x;
+    float dy = a.y - b.y;
+
+    return (dx * dx) + (dy * dy);
+}
+
 Vector2 Vector2::rotate(float radians)
 {
     //x' = x cos θ − y sin θ
@@ -130,4 +147,19 @@ Vector2 Vector2::rotate(float radians)
         (x * sinAngle) + (y * cosAngle));
 
     return rotatedVector;
+}
+
+float Vector2::length()
+{
+    return std::sqrt((x * x) + (y * y));
+}
+
+float Vector2::lengthSquared()
+{
+    return (x * x) + (y * y);
+}
+
+bool Vector2::nearlyEqual(const Vector2& a, const Vector2& b, float epsilon)
+{
+    return Math::nearlyEqual(a.x, b.x, epsilon) && Math::nearlyEqual(a.y, b.y, epsilon);
 }

@@ -4,6 +4,7 @@
 #include <RigidBody.h>
 #include <Vector2.h>
 #include <colliders/Collision.h>
+#include <colliders/PotentialCollisionPair.h>
 
 class World
 {
@@ -16,7 +17,8 @@ public:
     
 private:
     void subStep(float dt);
-    void detectCollisions();
+    std::vector<PotentialCollisionPair> broadPhaseDetection();
+    void narrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCollisions);
     void resolveCollisions();
 
     std::vector<RigidBody*> bodies;

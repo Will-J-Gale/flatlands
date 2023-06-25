@@ -11,6 +11,7 @@ public:
 
     AABBCollider GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::CIRCLE; }
+    float GetRotationalInertia(float mass) override;
     
     float radius = 0;
 };
