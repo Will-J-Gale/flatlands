@@ -90,5 +90,5 @@ std::vector<Line> BoxCollider::getEdges(Transform* transform)
 
 float BoxCollider::GetRotationalInertia(float mass)
 {
-    return (1/12) * mass * ((height*height) + (width*width));
+    return (1.0f/12.0f) * mass * ((height*height) + (width*width));
 }

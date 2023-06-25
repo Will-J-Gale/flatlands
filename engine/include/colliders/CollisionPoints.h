@@ -6,9 +6,10 @@
 struct CollisionPoints 
 {
     std::vector<Vector2> contacts;
-    Vector2 contactA; //Furthest point of A into B
-    Vector2 contactB; //Furthest point of B into A
     Vector2 normal;
     float depth = 0.0f;
     bool hasCollisions = false;
+
+    Vector2 impulses[2];
+    Vector2 frictionImpulses[2];
 };

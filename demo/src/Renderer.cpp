@@ -89,9 +89,14 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
         {
             if(collision.collisionPoints.contacts.size() > 0)
             {
-                for(Vector2 contact : collision.collisionPoints.contacts)
+                for(int i = 0; i < collision.collisionPoints.contacts.size(); i++)
                 {
+                    Vector2 contact = collision.collisionPoints.contacts[i];
                     drawList->AddCircleFilled(toImVec2(contact), 10.0f, GREEN);
+
+                    Vector2 frictionImpulse = collision.collisionPoints.frictionImpulses[i];
+                    Vector2 impulseEnd = contact + (frictionImpulse * 1);
+                    drawList->AddLine(toImVec2(contact), toImVec2(impulseEnd), RED, 5.0f);
                 }
             }
         }
@@ -165,7 +170,11 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         // pos.x += windowPos.x;
         // pos.y += windowPos.y;
 
+        float rotation = entity->rigidBody->transform.rotation;
+        Vector2 dir = Vector2(radius * std::cos(rotation), radius *std::sin(rotation));
+
         drawList->AddCircleFilled(toImVec2(pos), radius, WHITE);
+        drawList->AddLine(toImVec2(pos), toImVec2(pos + dir), BLACK);
     }
 
     else if(dynamic_cast<LineCollider*>(entity->collider.get()))

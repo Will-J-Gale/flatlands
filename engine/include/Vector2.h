@@ -22,9 +22,13 @@ struct Vector2
     float magnitude();
     Vector2 normalize();
     Vector2 normal();
+    Vector2 perpendicular();
     Vector2 rotate(float radians);
     float length();
     float lengthSquared();
+    static float cross(Vector2& a, Vector2& b);
+    static Vector2 cross(Vector2& a, float& s);
+    static Vector2 cross(float& s, Vector2& a);
     static float dot(Vector2& a, Vector2& b);
     static float distance(const Vector2& a, const Vector2& b);
     static float distanceSquared(const Vector2& a, const Vector2& b);

@@ -21,5 +21,5 @@ AABBCollider CircleCollider::GetAABB(Transform* transform)
 
 float CircleCollider::GetRotationalInertia(float mass)
 {
-    return 0.5 * mass * (radius * radius);
+    return 0.5f * mass * (radius * radius);
 }

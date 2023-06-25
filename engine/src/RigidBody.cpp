@@ -16,7 +16,7 @@ RigidBody::RigidBody(Collider* collider,  float mass, float friction, float elas
 {
     this->collider = collider;
     this->setMass(mass);
-    this->setFriction(friction);
+    // this->setFriction(friction);
     this->setStatic(isStatic);
     this->setRestitution(elasticity);
 }
@@ -36,10 +36,10 @@ void RigidBody::addAngularForce(float angularForce)
     this->angularAcceleration += angularForce / mass;
 }
 
-void RigidBody::setFriction(float friction)
-{
-    this->friction = friction;
-}
+// void RigidBody::setFriction(float friction)
+// {
+//     this->friction = friction;
+// }
 
 void RigidBody::setStatic(bool isStatic)
 {

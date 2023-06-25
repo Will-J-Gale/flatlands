@@ -20,15 +20,15 @@ void DemoApp::run()
     // createLine(Vector2(100.0f, 100.0f), 100.0f);
     // createLine(Vector2(100.0f, 125.0f), 100.0f);
 
-    createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 1.0f, 0.8f);
+    // createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 100.0f, 0.0f);
 
     // Static boxes
-    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.5f, 0.8f, true);
-    createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.5f, 0.8f, true);
-    createBox(Vector2(1200.0f, 700.0f), 1500, 20, -0.2f, 0.5f, 0.8f, true);
+    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
+    createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.0f, 0.0f, true);
+    createBox(Vector2(1200.0f, 500.0f), 1500, 20, -0.2f, 0.0f, 0.0f, true);
 
-    createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 0.8f);
-    createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.8f);
+    // createCircle(100.0f, Vector2(300.0f, 100.0f), 1.0f, 0.0f);
+    // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
 
     float movementSpeed = 10.0f;
     float angularSpeed = 0.5f;
@@ -71,13 +71,13 @@ void DemoApp::run()
         if(ImGui::IsMouseClicked(0))
         {
             float size = rand() % 50;
-            createCircle(size, renderer.getMousePosition(), 1.0f, 0.f);
+            createCircle(size, renderer.getMousePosition(), 10.0f, 0.f);
         }
         else if(ImGui::IsMouseClicked(1))
         {
-            float width = (rand() % 50) + 10.0f;
-            float height = (rand() % 50) + 10.0f;
-            createBox(renderer.getMousePosition(), width, height, 0.0f, 0.1f, 0.8f);
+            float width = (rand() % 150) + 50.0f;
+            float height = (rand() % 150) + 50.0f;
+            createBox(renderer.getMousePosition(), width, height, 0.0f, 10.0f, 0.0f);
         }
 
         entities[0]->rigidBody->addForce(force);

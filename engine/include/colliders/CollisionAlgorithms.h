@@ -408,7 +408,7 @@ namespace CollisionAlgorithms
     inline void GenerateBoxBoxContactPoints(
         BoxCollider* aCollider, Transform* aTransform,
         BoxCollider* bCollider, Transform* bTransform, 
-        CollisionPoints& collisionPoints)
+        CollisionPoints* collisionPoints)
     {
         std::vector<Vector2> aPoints = aCollider->transformPoints(aTransform);
         std::vector<Vector2> bPoints = bCollider->transformPoints(bTransform);
@@ -467,26 +467,26 @@ namespace CollisionAlgorithms
             }
         }
 
-        collisionPoints.contacts.emplace_back(std::move(contact1));
+        collisionPoints->contacts.emplace_back(std::move(contact1));
 
         if(contactCount == 2)
-            collisionPoints.contacts.emplace_back(std::move(contact2));
+            collisionPoints->contacts.emplace_back(std::move(contact2));
     }
 
     inline void GenerateCircleCircleContactPoints(
         CircleCollider* aCollider, Transform* aTransform,
         CircleCollider* bCollider, Transform* bTransform,
-        CollisionPoints& collisionPoints)
+        CollisionPoints* collisionPoints)
     {
         Vector2 dir = (bTransform->position - aTransform->position).normalize();
         Vector2 contact = aTransform->position + (dir * aCollider->radius);
-        collisionPoints.contacts.emplace_back(std::move(contact));
+        collisionPoints->contacts.emplace_back(std::move(contact));
     }
 
     inline void GenerateLineLineContactPoints(
         LineCollider* aCollider, Transform* aTransform, 
         LineCollider* bCollider, Transform* bTransform, 
-        CollisionPoints& collisionPoints)
+        CollisionPoints* collisionPoints)
     {
         
     }
@@ -494,7 +494,7 @@ namespace CollisionAlgorithms
     inline void GenerateCircleBoxContactPoints(
         CircleCollider* aCollider, Transform* aTransform, 
         BoxCollider* bCollider, Transform* bTransform, 
-        CollisionPoints& collisionPoints)
+        CollisionPoints* collisionPoints)
     {
         Vector2 contactPoint;
         float closestDistance = Math::FLOAT_MAX;
@@ -511,13 +511,13 @@ namespace CollisionAlgorithms
             }
         }
 
-        collisionPoints.contacts.emplace_back(std::move(contactPoint));
+        collisionPoints->contacts.emplace_back(std::move(contactPoint));
     }
 
     inline void GenerateCircleLineContactPoints(
         CircleCollider* aCollider, Transform* aTransform, 
         LineCollider* bCollider, Transform* bTransform,
-        CollisionPoints& collisionPoints)
+        CollisionPoints* collisionPoints)
     {
         
     }
@@ -525,7 +525,7 @@ namespace CollisionAlgorithms
     inline void GenerateBoxLineContactPoints(
         BoxCollider* aCollider, Transform* aTransform,
         LineCollider* bCollider, Transform* bTransform,
-        CollisionPoints& collisionPoints)
+        CollisionPoints* collisionPoints)
     {
         
     }
@@ -546,7 +546,7 @@ namespace CollisionAlgorithms
                 GenerateBoxBoxContactPoints(
                     static_cast<BoxCollider*>(aCollider), aTransform,
                     static_cast<BoxCollider*>(bCollider), bTransform,
-                    collision.collisionPoints
+                    &collision.collisionPoints
                 );
             }
             else if(bType == ColliderType::CIRCLE)
@@ -554,7 +554,7 @@ namespace CollisionAlgorithms
                 GenerateCircleBoxContactPoints(
                     static_cast<CircleCollider*>(bCollider), bTransform,
                     static_cast<BoxCollider*>(aCollider), aTransform,
-                    collision.collisionPoints
+                    &collision.collisionPoints
                 );
             }
             else
@@ -569,7 +569,7 @@ namespace CollisionAlgorithms
                 GenerateCircleBoxContactPoints(
                     static_cast<CircleCollider*>(aCollider), aTransform,
                     static_cast<BoxCollider*>(bCollider), bTransform,
-                    collision.collisionPoints
+                    &collision.collisionPoints
                 ); 
             }
             else if(bType == ColliderType::CIRCLE)
@@ -577,7 +577,7 @@ namespace CollisionAlgorithms
                 GenerateCircleCircleContactPoints(
                     static_cast<CircleCollider*>(aCollider), aTransform,
                     static_cast<CircleCollider*>(bCollider), bTransform,
-                    collision.collisionPoints
+                    &collision.collisionPoints
                 );
             }
             else

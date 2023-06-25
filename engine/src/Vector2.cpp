@@ -108,15 +108,35 @@ Vector2 Vector2::normalize()
     return *this / magnitude();
 }
 
+Vector2 Vector2::perpendicular()
+{
+    return Vector2(-y, x);
+}
+
 Vector2 Vector2::normal()
 {
     //Vector that is perpendicular to this vector
-    return Vector2(-y, x).normalize();
+    return perpendicular().normalize();
 }
 
 float Vector2::dot(Vector2& a, Vector2& b)
 {
     return (a.x * b.x) + (a.y * b.y);
+}
+
+float Vector2::cross(Vector2& a, Vector2& b)
+{
+    return a.x * b.y - a.y * b.x;
+}
+
+Vector2 Vector2::cross(float& s, Vector2& a)
+{
+    return Vector2(-s * a.y, s * a.x);
+}
+
+Vector2 Vector2::cross(Vector2& a, float& s)
+{
+    return Vector2(s * a.y, -s * a.x);
 }
 
 float Vector2::distance(const Vector2& a, const Vector2& b)

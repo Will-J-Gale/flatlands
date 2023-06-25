@@ -13,7 +13,7 @@ public:
     void addCollider(Collider* collider);
     void addForce(Vector2 force);
     void addAngularForce(float angularForce);
-    void setFriction(float friction);
+    // void setFriction(float friction);
     void setStatic(bool isStatic);
     void setMass(float mass);
     void setRestitution(float elasticity);
@@ -29,7 +29,8 @@ public:
     float invMass = 1.0f;
     float rotationalInertia = 1.0f;
     float invRotationalInertia = 1.0f;
-    float friction = 0.01f;
+    float staticFriction = 0.6f;
+    float dynamicFriction = 0.4f;
     float angularDampening = 0.01f;
     bool isStatic = false;
     float restitution = 1.0f;
