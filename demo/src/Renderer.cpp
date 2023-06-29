@@ -85,18 +85,21 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
             renderRigidBody(drawList, entity.get());
         }
 
-        for(Collision& collision : *collisions)
+        if(renderDebug)
         {
-            if(collision.collisionPoints.contacts.size() > 0)
+            for(Collision& collision : *collisions)
             {
-                for(int i = 0; i < collision.collisionPoints.contacts.size(); i++)
+                if(collision.collisionPoints.contacts.size() > 0)
                 {
-                    Vector2 contact = collision.collisionPoints.contacts[i];
-                    drawList->AddCircleFilled(toImVec2(contact), 10.0f, GREEN);
+                    for(int i = 0; i < collision.collisionPoints.contacts.size(); i++)
+                    {
+                        Vector2 contact = collision.collisionPoints.contacts[i];
+                        drawList->AddCircleFilled(toImVec2(contact), 10.0f, GREEN);
 
-                    Vector2 frictionImpulse = collision.collisionPoints.frictionImpulses[i];
-                    Vector2 impulseEnd = contact + (frictionImpulse * 1);
-                    drawList->AddLine(toImVec2(contact), toImVec2(impulseEnd), RED, 5.0f);
+                        Vector2 frictionImpulse = collision.collisionPoints.frictionImpulses[i];
+                        Vector2 impulseEnd = contact + (frictionImpulse * 1);
+                        drawList->AddLine(toImVec2(contact), toImVec2(impulseEnd), RED, 5.0f);
+                    }
                 }
             }
         }
@@ -106,7 +109,10 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
     Timer::stop("Render");
     {
-        ImGui::Begin("Metrics");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Debug");                          // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Checkbox("Render debug", &renderDebug);
+        ImGui::Spacing();
 
         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::Text("Entities: %li", entities.size());
@@ -150,26 +156,24 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
 
     Vector2 pos = entity->rigidBody->transform.position;
 
-    AABBCollider aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
-    float width = std::abs(aabb.max.x - aabb.min.x);
-    float height = std::abs(aabb.max.y - aabb.min.y);
-    drawList->AddQuad(
-        toImVec2(aabb.min),
-        toImVec2(aabb.min + Vector2(width, 0)),
-        toImVec2(aabb.max),
-        toImVec2(aabb.min + Vector2(0, height)),
-        GREEN
-    );
+    if(renderDebug)
+    {
+        AABBCollider aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
+        float width = std::abs(aabb.max.x - aabb.min.x);
+        float height = std::abs(aabb.max.y - aabb.min.y);
+        drawList->AddQuad(
+            toImVec2(aabb.min),
+            toImVec2(aabb.min + Vector2(width, 0)),
+            toImVec2(aabb.max),
+            toImVec2(aabb.min + Vector2(0, height)),
+            GREEN
+        );
+    }
 
     if(dynamic_cast<CircleCollider*>(entity->collider.get()))
     {
         CircleCollider* circleCollider = (CircleCollider*)entity->collider.get();
         float radius = circleCollider->radius;
-        // ImVec2 windowPos = ImGui::GetWindowPos();
-
-        // pos.x += windowPos.x;
-        // pos.y += windowPos.y;
-
         float rotation = entity->rigidBody->transform.rotation;
         Vector2 dir = Vector2(radius * std::cos(rotation), radius *std::sin(rotation));
 

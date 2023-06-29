@@ -13,7 +13,7 @@ public:
     LineCollider(Vector2 position, float width);
 
     AABBCollider GetAABB(Transform* transform) override;
-    ColliderType GetType() override { return ColliderType::LINE; }
+    ColliderType GetType() override { return ColliderType::POLYGON; }
     float GetRotationalInertia(float mass) override;
 
     std::vector<Vector2> transformPoints(Transform* transform);

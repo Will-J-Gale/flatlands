@@ -2,7 +2,7 @@
 #include <colliders/CollisionPoints.h>
 #include <colliders/CircleCollider.h>
 #include <colliders/LineCollider.h>
-#include <colliders/BoxCollider.h>
+#include <colliders/PolygonCollider.h>
 #include <colliders/Collision.h>
 #include <Vector2.h>
 #include <Line.h>
@@ -190,7 +190,7 @@ namespace CollisionAlgorithms
 
     inline CollisionPoints FindLineBoxCollisionPoints(
         LineCollider* a, Transform* aTransform,
-        BoxCollider* b, Transform* bTransform)
+        PolygonCollider* b, Transform* bTransform)
     {
         CollisionPoints collisionPoints;
 
@@ -210,8 +210,8 @@ namespace CollisionAlgorithms
     }
 
     inline CollisionPoints FindBoxBoxCollision(
-        BoxCollider* a, Transform* aTransform,
-        BoxCollider* b, Transform* bTransform)
+        PolygonCollider* a, Transform* aTransform,
+        PolygonCollider* b, Transform* bTransform)
     {
         https://www.youtube.com/watch?v=SUyG3aV_vpM&list=PLSlpr6o9vURwq3oxVZSimY8iC-cdd3kIs&index=9
 
@@ -281,7 +281,7 @@ namespace CollisionAlgorithms
     
 
     inline CollisionPoints FindBoxCircleCollision(
-        BoxCollider* a, Transform* aTransform,
+        PolygonCollider* a, Transform* aTransform,
         CircleCollider* b, Transform* bTransform)
     {
         //SAT 2.0
@@ -352,19 +352,19 @@ namespace CollisionAlgorithms
         ColliderType aType = aCollider->GetType();
         ColliderType bType = bCollider->GetType();
 
-        if(aType == ColliderType::BOX)
+        if(aType == ColliderType::POLYGON)
         {
-            if(bType == ColliderType::BOX)
+            if(bType == ColliderType::POLYGON)
             {
                 return FindBoxBoxCollision(
-                    static_cast<BoxCollider*>(aCollider), aTransform, 
-                    static_cast<BoxCollider*>(bCollider), bTransform
+                    static_cast<PolygonCollider*>(aCollider), aTransform, 
+                    static_cast<PolygonCollider*>(bCollider), bTransform
                 );
             }
             else if(bType == ColliderType::CIRCLE)
             {
                 return FindBoxCircleCollision(
-                    static_cast<BoxCollider*>(aCollider), aTransform, 
+                    static_cast<PolygonCollider*>(aCollider), aTransform, 
                     static_cast<CircleCollider*>(bCollider), bTransform
                 );
             }
@@ -375,10 +375,10 @@ namespace CollisionAlgorithms
         }
         else if(aType == ColliderType::CIRCLE)
         {
-            if(bType == ColliderType::BOX)
+            if(bType == ColliderType::POLYGON)
             {
                 CollisionPoints collisionPoints = FindBoxCircleCollision(
-                    static_cast<BoxCollider*>(bCollider), bTransform, 
+                    static_cast<PolygonCollider*>(bCollider), bTransform, 
                     static_cast<CircleCollider*>(aCollider), aTransform
                 );
 
@@ -406,8 +406,8 @@ namespace CollisionAlgorithms
     }
 
     inline void GenerateBoxBoxContactPoints(
-        BoxCollider* aCollider, Transform* aTransform,
-        BoxCollider* bCollider, Transform* bTransform, 
+        PolygonCollider* aCollider, Transform* aTransform,
+        PolygonCollider* bCollider, Transform* bTransform, 
         CollisionPoints* collisionPoints)
     {
         std::vector<Vector2> aPoints = aCollider->transformPoints(aTransform);
@@ -493,7 +493,7 @@ namespace CollisionAlgorithms
 
     inline void GenerateCircleBoxContactPoints(
         CircleCollider* aCollider, Transform* aTransform, 
-        BoxCollider* bCollider, Transform* bTransform, 
+        PolygonCollider* bCollider, Transform* bTransform, 
         CollisionPoints* collisionPoints)
     {
         Vector2 contactPoint;
@@ -523,7 +523,7 @@ namespace CollisionAlgorithms
     }
 
     inline void GenerateBoxLineContactPoints(
-        BoxCollider* aCollider, Transform* aTransform,
+        PolygonCollider* aCollider, Transform* aTransform,
         LineCollider* bCollider, Transform* bTransform,
         CollisionPoints* collisionPoints)
     {
@@ -539,13 +539,13 @@ namespace CollisionAlgorithms
         Collider* aCollider = collision.a->collider;
         Collider* bCollider = collision.b->collider;
 
-        if(aType == ColliderType::BOX)
+        if(aType == ColliderType::POLYGON)
         {
-            if(bType == ColliderType::BOX)
+            if(bType == ColliderType::POLYGON)
             {
                 GenerateBoxBoxContactPoints(
-                    static_cast<BoxCollider*>(aCollider), aTransform,
-                    static_cast<BoxCollider*>(bCollider), bTransform,
+                    static_cast<PolygonCollider*>(aCollider), aTransform,
+                    static_cast<PolygonCollider*>(bCollider), bTransform,
                     &collision.collisionPoints
                 );
             }
@@ -553,7 +553,7 @@ namespace CollisionAlgorithms
             {
                 GenerateCircleBoxContactPoints(
                     static_cast<CircleCollider*>(bCollider), bTransform,
-                    static_cast<BoxCollider*>(aCollider), aTransform,
+                    static_cast<PolygonCollider*>(aCollider), aTransform,
                     &collision.collisionPoints
                 );
             }
@@ -564,11 +564,11 @@ namespace CollisionAlgorithms
         }
         else if(aType == ColliderType::CIRCLE)
         {
-            if(bType == ColliderType::BOX)
+            if(bType == ColliderType::POLYGON)
             {
                 GenerateCircleBoxContactPoints(
                     static_cast<CircleCollider*>(aCollider), aTransform,
-                    static_cast<BoxCollider*>(bCollider), bTransform,
+                    static_cast<PolygonCollider*>(bCollider), bTransform,
                     &collision.collisionPoints
                 ); 
             }

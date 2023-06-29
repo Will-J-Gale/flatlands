@@ -11,9 +11,8 @@ class BoxCollider;
 
 enum class ColliderType
 {
-    BOX,
+    POLYGON,
     CIRCLE,
-    LINE
 };
 
 class Collider

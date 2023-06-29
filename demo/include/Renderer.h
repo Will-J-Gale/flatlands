@@ -27,4 +27,5 @@ private:
     float dt = 0;
     Vector2 mousePosition = Vector2(0,0);
     ImVec2 windowSize = ImVec2(0, 0);
+    bool renderDebug = false;
 };
