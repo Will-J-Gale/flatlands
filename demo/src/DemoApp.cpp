@@ -1,8 +1,8 @@
 #include <iostream>
 #include "DemoApp.h"
-#include <colliders/CircleCollider.h>
-#include <colliders/LineCollider.h>
-#include <colliders/BoxCollider.h>
+#include <collision/colliders/CircleCollider.h>
+#include <collision/colliders/LineCollider.h>
+#include <collision/colliders/BoxCollider.h>
 #include <core/Time.h>
 #include <core/Logger.h>
 #include <imgui.h>

@@ -1,7 +1,7 @@
 #include <cmath>
 
-#include <colliders/LineCollider.h>
-#include <colliders/CollisionAlgorithms.h>
+#include <collision/colliders/LineCollider.h>
+#include <collision/CollisionAlgorithms.h>
 #include <core/Logger.h>
 
 #define PI 3.14159

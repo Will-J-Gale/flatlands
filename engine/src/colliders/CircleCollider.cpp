@@ -1,5 +1,5 @@
-#include <colliders/CircleCollider.h>
-#include <colliders/CollisionAlgorithms.h>
+#include <collision/colliders/CircleCollider.h>
+#include <collision/CollisionAlgorithms.h>
 
 CircleCollider::CircleCollider() : Collider()
 {

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <Renderer.h>
-#include <colliders/CircleCollider.h>
-#include <colliders/LineCollider.h>
-#include <colliders/BoxCollider.h>
+#include <collision/colliders/CircleCollider.h>
+#include <collision/colliders/LineCollider.h>
+#include <collision/colliders/BoxCollider.h>
 #include <core/Logger.h>
-#include <colliders/CollisionAlgorithms.h>
+#include <collision/CollisionAlgorithms.h>
 #include <Constants.h>
 #include <core/Timer.h>
 

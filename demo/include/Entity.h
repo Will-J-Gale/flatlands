@@ -1,6 +1,6 @@
 #pragma once
 #include <RigidBody.h>
-#include <colliders/Collider.h>
+#include <collision/colliders/Collider.h>
 
 struct Entity
 {

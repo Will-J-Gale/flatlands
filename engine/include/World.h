@@ -3,8 +3,8 @@
 #include <vector>
 #include <RigidBody.h>
 #include <Vector2.h>
-#include <colliders/Collision.h>
-#include <colliders/PotentialCollisionPair.h>
+#include <collision/Collision.h>
+#include <collision/PotentialCollisionPair.h>
 
 class World
 {

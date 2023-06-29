@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 #include <Transform.h>
-#include <colliders/Collider.h>
-#include <colliders/CollisionPoints.h>
+#include <collision/colliders/Collider.h>
+#include <collision/CollisionPoints.h>
 #include <Vector2.h>
 #include <Line.h>
 

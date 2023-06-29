@@ -1,9 +1,9 @@
 #include "World.h"
 #include <algorithm>
-#include <colliders/Collision.h>
-#include <colliders/CollisionPoints.h>
+#include <collision/Collision.h>
+#include <collision/CollisionPoints.h>
 #include <core/Logger.h>
-#include <colliders/CollisionAlgorithms.h>
+#include <collision/CollisionAlgorithms.h>
 #include <core/Timer.h>
 #include <cmath>
 #include <core/Math.h>

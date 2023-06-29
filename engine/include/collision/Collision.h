@@ -1,6 +1,6 @@
 #pragma once
 #include <RigidBody.h>
-#include <colliders/CollisionPoints.h>
+#include <collision/CollisionPoints.h>
 
 struct Collision
 {

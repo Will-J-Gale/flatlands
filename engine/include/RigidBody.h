@@ -2,7 +2,7 @@
 
 #include <Vector2.h>
 #include <Transform.h>
-#include <colliders/Collider.h>
+#include <collision/colliders/Collider.h>
 
 class RigidBody
 {

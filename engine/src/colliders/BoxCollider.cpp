@@ -1,5 +1,5 @@
-#include <colliders/BoxCollider.h>
-#include <colliders/CollisionAlgorithms.h>
+#include <collision/colliders/BoxCollider.h>
+#include <collision/CollisionAlgorithms.h>
 #include <core/Math.h>
 #include <core/Logger.h>
 

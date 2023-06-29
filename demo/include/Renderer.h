@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 #include <Vector2.h>
 #include <Entity.h>
-#include <colliders/Collision.h>
+#include <collision/Collision.h>
 
 class Renderer
 {

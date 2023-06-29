@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
-#include <colliders/PolygonCollider.h>
-#include <colliders/CollisionPoints.h>
+#include <collision/colliders/PolygonCollider.h>
+#include <collision/CollisionPoints.h>
 #include <Vector2.h>
 #include <Line.h>
 

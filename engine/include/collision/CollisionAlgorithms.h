@@ -1,9 +1,9 @@
 #pragma once
-#include <colliders/CollisionPoints.h>
-#include <colliders/CircleCollider.h>
-#include <colliders/LineCollider.h>
-#include <colliders/PolygonCollider.h>
-#include <colliders/Collision.h>
+#include <collision/CollisionPoints.h>
+#include <collision/colliders/CircleCollider.h>
+#include <collision/colliders/LineCollider.h>
+#include <collision/colliders/PolygonCollider.h>
+#include <collision/Collision.h>
 #include <Vector2.h>
 #include <Line.h>
 #include <Transform.h>

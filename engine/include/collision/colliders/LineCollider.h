@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "Collider.h"
-#include <colliders/CollisionPoints.h>
+#include <collision/CollisionPoints.h>
 #include <Line.h>
 
 class LineCollider : public Collider

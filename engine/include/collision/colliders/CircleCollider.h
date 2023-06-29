@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Collider.h"
-#include <colliders/CollisionPoints.h>
+#include <collision/CollisionPoints.h>
 
 class CircleCollider : public Collider
 {

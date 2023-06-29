@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Transform.h>
-#include <colliders/AABBCollider.h>
+#include <collision/colliders/AABBCollider.h>
 
 //Forward declarations
 class CollisionPoints;
