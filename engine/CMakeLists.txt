@@ -2,9 +2,8 @@ project("engine")
 
 add_library(${PROJECT_NAME} STATIC)
 
-file(GLOB SRC_FILES    
+file(GLOB_RECURSE SRC_FILES    
     "src/*.cpp"
-    "src/**/*.cpp"
 )
 
 message(STATUS ${SRC_FILES})
