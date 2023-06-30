@@ -1,6 +1,9 @@
 #pragma once
 #include <cmath>
 #include <limits>
+#include <vector>
+
+class Vector2;
 
 namespace Math
 {

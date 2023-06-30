@@ -23,9 +23,15 @@ public:
     ImVec2 toImVec2(Vector2 v);
 
 private:
+    void drawCircleOnAxis(ImDrawList* drawList, Vector2 axis, float radius, Vector2 position);
+    void drawPolygonOnAxis(ImDrawList* drawList, Vector2 axis, std::vector<Vector2> vertices);
+    void drawCollisionDetection(ImDrawList* drawList, std::vector<std::shared_ptr<Entity>>& entities);
+    void drawAxis(ImDrawList* drawList, Vector2 axis, float length=1000.0f);
+private:
     GLFWwindow* window;
     float dt = 0;
     Vector2 mousePosition = Vector2(0,0);
     ImVec2 windowSize = ImVec2(0, 0);
     bool renderDebug = false;
+
 };

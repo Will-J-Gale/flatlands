@@ -126,6 +126,7 @@ float Vector2::dot(Vector2& a, Vector2& b)
 
 float Vector2::cross(Vector2& a, Vector2& b)
 {
+    //This is actually just the Z component of a 3D vector cross product
     return a.x * b.y - a.y * b.x;
 }
 
@@ -162,11 +163,10 @@ Vector2 Vector2::rotate(float radians)
     float cosAngle = std::cos(radians);
     float sinAngle = std::sin(radians);
 
-    Vector2 rotatedVector = Vector2(
+    return Vector2(
         (x * cosAngle) - (y * sinAngle), 
-        (x * sinAngle) + (y * cosAngle));
-
-    return rotatedVector;
+        (x * sinAngle) + (y * cosAngle)
+    );
 }
 
 float Vector2::length()
@@ -182,4 +182,21 @@ float Vector2::lengthSquared()
 bool Vector2::nearlyEqual(const Vector2& a, const Vector2& b, float epsilon)
 {
     return Math::nearlyEqual(a.x, b.x, epsilon) && Math::nearlyEqual(a.y, b.y, epsilon);
+}
+
+Vector2 Vector2::findCenterPoint(std::vector<Vector2>& vertices)
+{
+    Vector2 center;
+
+    for(Vector2& vertex : vertices)
+    {
+        center += vertex;
+    }
+
+    return center / vertices.size();
+}
+
+Vector2 Vector2::abs(const Vector2& v)
+{
+    return Vector2(std::abs(v.x), std::abs(v.y));
 }

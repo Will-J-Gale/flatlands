@@ -39,3 +39,20 @@ inline void loginfo(Vector2 vector)
 
     loginfo(text);
 }
+
+inline void loginfo(std::initializer_list<Vector2> vectors)
+{
+    std::string text;
+
+    for(Vector2 v : vectors)
+    {
+        text += "(x: ";
+        text += std::to_string(v.x);
+        text += " y: ";
+        text += std::to_string(v.y);
+        text += ")";
+        text += " ";
+    }
+
+    loginfo(text);
+}
