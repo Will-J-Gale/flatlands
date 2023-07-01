@@ -17,6 +17,7 @@ public:
     
 private:
     void subStep(float dt);
+    void moveRigidBodies(float dt);
     std::vector<PotentialCollisionPair> broadPhaseDetection();
     void narrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCollisions);
     void resolveCollisions();
@@ -25,5 +26,4 @@ private:
     std::vector<Collision> collisions;
     Vector2 gravity;
     int numIterations = 1;
-    float dt = 0;
 };

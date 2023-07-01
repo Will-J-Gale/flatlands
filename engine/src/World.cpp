@@ -30,6 +30,15 @@ void World::step(float dt)
 
 void World::subStep(float dt)
 {
+    collisions.clear();
+    moveRigidBodies(dt);
+    std::vector<PotentialCollisionPair> potentialCollisions = broadPhaseDetection();
+    narrowPhaseDetection(potentialCollisions);
+    resolveCollisions();
+}
+
+void World::moveRigidBodies(float dt)
+{
     for(RigidBody* body : bodies)
     {
         if(body->isStatic)
@@ -44,11 +53,6 @@ void World::subStep(float dt)
         body->force.set(0.0f, 0.0f);
         body->angularAcceleration = 0.0f;
     }
-
-    collisions.clear();
-    std::vector<PotentialCollisionPair> potentialCollisions = broadPhaseDetection();
-    narrowPhaseDetection(potentialCollisions);
-    resolveCollisions();
 }
 
 std::vector<PotentialCollisionPair> World::broadPhaseDetection()
