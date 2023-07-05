@@ -13,6 +13,7 @@ enum class ColliderType
 {
     POLYGON,
     CIRCLE,
+    CAPSULE
 };
 
 class Collider

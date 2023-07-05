@@ -3,12 +3,14 @@
 #include <collision/colliders/CircleCollider.h>
 #include <collision/colliders/LineCollider.h>
 #include <collision/colliders/ConvexPolygonCollider.h>
+#include <collision/colliders/CapsuleCollider.h>
 #include <collision/Collision.h>
 #include <Vector2.h>
 #include <Line.h>
 #include <Transform.h>
 #include <core/Logger.h>
 #include <core/Math.h>
+#include <core/Core.h>
 
 namespace CollisionAlgorithms
 {
@@ -85,7 +87,7 @@ namespace CollisionAlgorithms
 			a->min.y < b->max.y;
     }
 
-    inline CollisionPoints FindCircleCircleCollisionPoints(
+    inline CollisionPoints TestCircleCircleCollision(
         CircleCollider* a, Transform* aTransform,
         CircleCollider* b, Transform* bTransform)
     {
@@ -96,10 +98,8 @@ namespace CollisionAlgorithms
 
         if(distance < radiusCombined)
         {
-            //Penetration response
             Vector2 direction = bTransform->position - aTransform->position;
             float penetrationDepth = radiusCombined - direction.magnitude();
-            Vector2 penetrationResolution = direction.normalize() * (penetrationDepth / 2.0f);
 
             collisionPoints.hasCollisions = true;
             collisionPoints.normal = direction.normalize();
@@ -209,7 +209,7 @@ namespace CollisionAlgorithms
         return center / vertices.size();
     }
 
-    inline CollisionPoints FindBoxBoxCollision(
+    inline CollisionPoints TestBoxBoxCollision(
         ConvexPolygonCollider* a, Transform* aTransform,
         ConvexPolygonCollider* b, Transform* bTransform)
     {
@@ -280,7 +280,7 @@ namespace CollisionAlgorithms
 
     
 
-    inline CollisionPoints FindBoxCircleCollision(
+    inline CollisionPoints TestBoxCircleCollision(
         ConvexPolygonCollider* a, Transform* aTransform,
         CircleCollider* b, Transform* bTransform)
     {
@@ -344,6 +344,31 @@ namespace CollisionAlgorithms
         return collisionPoints;
     }
 
+    inline CollisionPoints TestCircleCapsuleCollision(
+        CircleCollider* a, Transform* aTransform,
+        CapsuleCollider* b, Transform* bTransform)
+    {
+        CollisionPoints collisionPoints;
+
+        float capsuleRadius = b->GetWidth() / 2.0f;
+        Line capsuleCenterLine = b->GetCenterLine(bTransform);
+        Vector2 closestPoint = capsuleCenterLine.closestPointOnLine(aTransform->position);
+        float distanceToCircle = Vector2::distance(closestPoint, aTransform->position);
+        float radiusSum = capsuleRadius + a->radius;
+
+        if(distanceToCircle <= radiusSum)
+        {
+            Vector2 direction = closestPoint - aTransform->position;
+            float depth = radiusSum - direction.magnitude();
+
+            collisionPoints.normal = direction.normalize();
+            collisionPoints.depth = depth;
+            collisionPoints.hasCollisions = true;
+        } 
+
+        return collisionPoints;
+    }
+
     inline CollisionPoints TestCollision(
         Collider* aCollider, Transform* aTransform,
         Collider* bCollider, Transform* bTransform)
@@ -355,16 +380,16 @@ namespace CollisionAlgorithms
         {
             if(bType == ColliderType::POLYGON)
             {
-                return FindBoxBoxCollision(
-                    static_cast<ConvexPolygonCollider*>(aCollider), aTransform, 
-                    static_cast<ConvexPolygonCollider*>(bCollider), bTransform
+                return TestBoxBoxCollision(
+                    dynamic_cast<ConvexPolygonCollider*>(aCollider), aTransform, 
+                    dynamic_cast<ConvexPolygonCollider*>(bCollider), bTransform
                 );
             }
             else if(bType == ColliderType::CIRCLE)
             {
-                return FindBoxCircleCollision(
-                    static_cast<ConvexPolygonCollider*>(aCollider), aTransform, 
-                    static_cast<CircleCollider*>(bCollider), bTransform
+                return TestBoxCircleCollision(
+                    dynamic_cast<ConvexPolygonCollider*>(aCollider), aTransform, 
+                    dynamic_cast<CircleCollider*>(bCollider), bTransform
                 );
             }
             else
@@ -376,9 +401,9 @@ namespace CollisionAlgorithms
         {
             if(bType == ColliderType::POLYGON)
             {
-                CollisionPoints collisionPoints = FindBoxCircleCollision(
-                    static_cast<ConvexPolygonCollider*>(bCollider), bTransform, 
-                    static_cast<CircleCollider*>(aCollider), aTransform
+                CollisionPoints collisionPoints = TestBoxCircleCollision(
+                    dynamic_cast<ConvexPolygonCollider*>(bCollider), bTransform, 
+                    dynamic_cast<CircleCollider*>(aCollider), aTransform
                 );
 
                 //Flip normal becuase Collision test flipped A and B
@@ -387,10 +412,35 @@ namespace CollisionAlgorithms
             }
             else if(bType == ColliderType::CIRCLE)
             {
-                return FindCircleCircleCollisionPoints(
-                    static_cast<CircleCollider*>(aCollider), aTransform, 
-                    static_cast<CircleCollider*>(bCollider), bTransform
+                return TestCircleCircleCollision(
+                    dynamic_cast<CircleCollider*>(aCollider), aTransform, 
+                    dynamic_cast<CircleCollider*>(bCollider), bTransform
                 );
+            }
+            else if(bType == ColliderType::CAPSULE)
+            {
+                return TestCircleCapsuleCollision(
+                    dynamic_cast<CircleCollider*>(aCollider), aTransform, 
+                    dynamic_cast<CapsuleCollider*>(bCollider), bTransform
+                );
+            }
+            else
+            {
+                return CollisionPoints();
+            }
+        }
+        else if(aType == ColliderType::CAPSULE)
+        {
+            if(bType == ColliderType::CIRCLE)
+            {
+                CollisionPoints collisionPoints = TestCircleCapsuleCollision(
+                    dynamic_cast<CircleCollider*>(bCollider), bTransform, 
+                    dynamic_cast<CapsuleCollider*>(aCollider), aTransform
+                );
+
+                collisionPoints.normal *= -1;
+                return collisionPoints;
+
             }
             else
             {
@@ -529,6 +579,16 @@ namespace CollisionAlgorithms
         
     }
 
+    inline void GenerateCircleCapsuleContactPoints(
+        CircleCollider* a, Transform* aTransform,
+        CapsuleCollider* b, Transform* bTransform,
+        CollisionPoints* collisionPoints
+    )
+    {
+        Vector2 contact = aTransform->position + (-collisionPoints->normal * a->radius);
+        collisionPoints->contacts.push_back(contact);
+    }
+
     inline void GenerateContactPoints(Collision& collision)
     {
         ColliderType aType = collision.a->collider->GetType();
@@ -579,9 +639,28 @@ namespace CollisionAlgorithms
                     &collision.collisionPoints
                 );
             }
+            else if(bType == ColliderType::CAPSULE)
+            {
+                GenerateCircleCapsuleContactPoints(
+                    static_cast<CircleCollider*>(aCollider), aTransform,
+                    static_cast<CapsuleCollider*>(bCollider), bTransform,
+                    &collision.collisionPoints
+                );
+            }
             else
             {
                 //@TODO 
+            }
+        }
+        else if(aType == ColliderType::CAPSULE)
+        {
+            if(bType == ColliderType::CIRCLE)
+            {
+                GenerateCircleCapsuleContactPoints(
+                    static_cast<CircleCollider*>(bCollider), bTransform,
+                    static_cast<CapsuleCollider*>(aCollider), aTransform,
+                    &collision.collisionPoints
+                );
             }
         }
         else

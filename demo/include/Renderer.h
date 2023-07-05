@@ -5,7 +5,13 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>
+
+#include <collision/colliders/CircleCollider.h>
+#include <collision/colliders/LineCollider.h>
+#include <collision/colliders/BoxCollider.h>
+#include <collision/colliders/ConvexPolygonCollider.h>
+#include <collision/colliders/CapsuleCollider.h>
 #include <Vector2.h>
 #include <Entity.h>
 #include <collision/Collision.h>
@@ -14,6 +20,7 @@ class Renderer
 {
 public:
     Renderer();
+    ~Renderer();
     
     void render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions);
     void destroy();
@@ -34,4 +41,6 @@ private:
     ImVec2 windowSize = ImVec2(0, 0);
     bool renderDebug = false;
 
+    void drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Transform* transform, ImU32 colour);
+    void drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform);
 };

@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <Renderer.h>
-#include <collision/colliders/CircleCollider.h>
-#include <collision/colliders/LineCollider.h>
-#include <collision/colliders/BoxCollider.h>
-#include <collision/colliders/ConvexPolygonCollider.h>
+
 #include <core/Logger.h>
 #include <collision/CollisionAlgorithms.h>
 #include <Constants.h>
@@ -35,102 +32,136 @@ void Renderer::drawAxis(ImDrawList* drawList, Vector2 axis, float length)
     drawList->AddLine(toImVec2(Vector2()), toImVec2(negativeEnd), WHITE, 2.0f);
 }
 
+// void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::shared_ptr<Entity>>& entities)
+// {
+//     //Draw circle/polygon axis projections
+//     Entity* entity =  entities[0].get();
+//     Entity* circle = entities[1].get();
+
+//     ConvexPolygonCollider* polyCollider = dynamic_cast<ConvexPolygonCollider*>(entity->collider.get());
+//     Transform* polyTransform = &entity->rigidBody->transform;
+
+//     CircleCollider* circleCollider = dynamic_cast<CircleCollider*>(circle->collider.get());
+//     Transform* circleTransform = &circle->rigidBody->transform;
+
+//     // for(Vector2& axis : polyCollider->getAxes(transform.rotation))
+//     // {
+//     //     float axisLength = 1000.0f;
+//     //     Vector2 positiveEnd = axis * axisLength; 
+//     //     Vector2 negativeEnd = -axis * axisLength; 
+//     //     drawList->AddLine(toImVec2(Vector2()), toImVec2(positiveEnd), BLUE, 2.0f);
+//     //     drawList->AddLine(toImVec2(Vector2()), toImVec2(negativeEnd), WHITE, 2.0f);
+        
+//     //     auto polygonProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, polyCollider->transformPoints(&transform));
+//     //     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.min), 4.0f, GREEN);
+//     //     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.max), 7.0f, GREEN);
+
+//     //     auto circleProjection = CollisionAlgorithms::projectCircleOnToAxis(circleCollider->radius, circleTransform.position, axis);
+//     //     drawList->AddCircleFilled(toImVec2(axis * circleProjection.min), 4.0f, RED);
+//     //     drawList->AddCircleFilled(toImVec2(axis * circleProjection.max), 7.0f, RED);
+//     // }
+
+//     //SAT 2.0
+//     //Algorithm is a little wonky because Y is flipped from most game engines (Normal up is positive, this down is positive)
+//     CollisionPoints collisionPoints;
+//     collisionPoints.depth = Math::FLOAT_MAX;
+
+//     //Get shape vertices
+//     std::vector<Vector2> aPoints = polyCollider->transformPoints(polyTransform);
+//     std::vector<Vector2> aAxes = polyCollider->getAxes(polyTransform->rotation);
+
+//     for(Vector2& axis : aAxes)
+//     {
+//         auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, aPoints);
+//         auto bProjection = CollisionAlgorithms::projectCircleOnToAxis(circleCollider->radius, circleTransform->position, axis);
+
+//         Vector2 box_projection = polyTransform->position + (axis * aProjection.min);
+
+//         if(aProjection.min >= bProjection.max || bProjection.min >= aProjection.max)
+//         {
+//             collisionPoints.hasCollisions = false;
+//             // return;
+//         }
+        
+//         // drawAxis(drawList, axis);
+//         // drawPolygonOnAxis(drawList, axis, aPoints);
+//         // drawCircleOnAxis(drawList, axis, circleCollider->radius, circleTransform->position);
+
+//         float axisDepth = std::min(bProjection.max - aProjection.min, aProjection.max - bProjection.min);
+
+//         if(axisDepth < collisionPoints.depth)
+//         {
+//             collisionPoints.depth = axisDepth;
+//             collisionPoints.normal = axis;
+//         }
+//     }
+
+//     Vector2 closestVertex = CollisionAlgorithms::getClosestVertexToPoint(circleTransform->position, aPoints);
+//     Vector2 axis = (closestVertex - circleTransform->position).normalize();
+
+//     drawList->AddCircleFilled(toImVec2(closestVertex), 10.0f, CYAN);
+//     auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, aPoints);
+//     auto bProjection = CollisionAlgorithms::projectCircleOnToAxis(circleCollider->radius, circleTransform->position, axis);
+
+//     drawAxis(drawList, axis);
+//     drawPolygonOnAxis(drawList, axis, aPoints);
+//     drawCircleOnAxis(drawList, axis, circleCollider->radius, circleTransform->position);
+//     drawList->AddLine(toImVec2(closestVertex), toImVec2(circleTransform->position), GREEN);
+
+//     if(aProjection.min >= bProjection.max || bProjection.min >= aProjection.max)
+//     {
+//         collisionPoints.hasCollisions = false;
+//         return;
+//     }
+
+//     float axisDepth = std::min(bProjection.max - aProjection.min, aProjection.max - bProjection.min);
+
+//     if(axisDepth < collisionPoints.depth)
+//     {
+//         collisionPoints.depth = axisDepth;
+//         collisionPoints.normal = axis;
+//     }
+
+//     Vector2 centerA = CollisionAlgorithms::getCenterPoint(aPoints);
+//     Vector2 dir = circleTransform->position - centerA;
+
+//     if(Vector2::dot(dir, collisionPoints.normal) < 0)
+//         collisionPoints.normal *= -1;
+
+// }
+
+
 void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::shared_ptr<Entity>>& entities)
 {
-    //Draw circle/polygon axis projections
-    Entity* entity =  entities[0].get();
-    Entity* circle = entities[1].get();
+    // CapsuleCollider* b = dynamic_cast<CapsuleCollider*>(entities[0]->collider.get());
+    // Transform* bTransform = &entities[0]->rigidBody->transform;
+    // CircleCollider* a = dynamic_cast<CircleCollider*>(entities[1]->collider.get());
+    // Transform* aTransform = &entities[1]->rigidBody->transform;
 
-    ConvexPolygonCollider* polyCollider = dynamic_cast<ConvexPolygonCollider*>(entity->collider.get());
-    Transform* polyTransform = &entity->rigidBody->transform;
+    // float capsuleRadius = b->GetWidth() / 2.0f;
+    // Line capsuleCenterLine = b->GetCenterLine(bTransform);
+    // Vector2 closestPoint = capsuleCenterLine.closestPointOnLine(aTransform->position);
+    // float distanceToCircle = Vector2::distance(closestPoint, aTransform->position);
+    // float radiusSum = capsuleRadius + a->radius;
 
-    CircleCollider* circleCollider = dynamic_cast<CircleCollider*>(circle->collider.get());
-    Transform* circleTransform = &circle->rigidBody->transform;
-
-    // for(Vector2& axis : polyCollider->getAxes(transform.rotation))
+    // if(distanceToCircle <= radiusSum)
     // {
-    //     float axisLength = 1000.0f;
-    //     Vector2 positiveEnd = axis * axisLength; 
-    //     Vector2 negativeEnd = -axis * axisLength; 
-    //     drawList->AddLine(toImVec2(Vector2()), toImVec2(positiveEnd), BLUE, 2.0f);
-    //     drawList->AddLine(toImVec2(Vector2()), toImVec2(negativeEnd), WHITE, 2.0f);
+    //     Vector2 direction = aTransform->position - closestPoint;
+    //     Vector2 contact = aTransform->position + (-direction.normalize() * a->radius);
+    //     float depth = radiusSum - direction.magnitude();
         
-    //     auto polygonProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, polyCollider->transformPoints(&transform));
-    //     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.min), 4.0f, GREEN);
-    //     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.max), 7.0f, GREEN);
+    //     // Vector2 normal = direction.normalize();
+    //     Vector2 end = contact + (direction.normalize() * depth);
+    //     drawList->AddLine(toImVec2(contact), toImVec2(end), RED, 2.0f);
+    //     drawList->AddCircleFilled(toImVec2(contact), 3.0f, RED);
 
-    //     auto circleProjection = CollisionAlgorithms::projectCircleOnToAxis(circleCollider->radius, circleTransform.position, axis);
-    //     drawList->AddCircleFilled(toImVec2(axis * circleProjection.min), 4.0f, RED);
-    //     drawList->AddCircleFilled(toImVec2(axis * circleProjection.max), 7.0f, RED);
+    //     Transform newTransform = *bTransform;
+    //     newTransform.position += (-direction.normalize() * depth);
+    //     drawCapsule(drawList, b, &newTransform, MAGENTA);
     // }
-
-    //SAT 2.0
-    //Algorithm is a little wonky because Y is flipped from most game engines (Normal up is positive, this down is positive)
-    CollisionPoints collisionPoints;
-    collisionPoints.depth = Math::FLOAT_MAX;
-
-    //Get shape vertices
-    std::vector<Vector2> aPoints = polyCollider->transformPoints(polyTransform);
-    std::vector<Vector2> aAxes = polyCollider->getAxes(polyTransform->rotation);
-
-    for(Vector2& axis : aAxes)
-    {
-        auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, aPoints);
-        auto bProjection = CollisionAlgorithms::projectCircleOnToAxis(circleCollider->radius, circleTransform->position, axis);
-
-        Vector2 box_projection = polyTransform->position + (axis * aProjection.min);
-
-        if(aProjection.min >= bProjection.max || bProjection.min >= aProjection.max)
-        {
-            collisionPoints.hasCollisions = false;
-            // return;
-        }
-        
-        // drawAxis(drawList, axis);
-        // drawPolygonOnAxis(drawList, axis, aPoints);
-        // drawCircleOnAxis(drawList, axis, circleCollider->radius, circleTransform->position);
-
-        float axisDepth = std::min(bProjection.max - aProjection.min, aProjection.max - bProjection.min);
-
-        if(axisDepth < collisionPoints.depth)
-        {
-            collisionPoints.depth = axisDepth;
-            collisionPoints.normal = axis;
-        }
-    }
-
-    Vector2 closestVertex = CollisionAlgorithms::getClosestVertexToPoint(circleTransform->position, aPoints);
-    Vector2 axis = (closestVertex - circleTransform->position).normalize();
-
-    drawList->AddCircleFilled(toImVec2(closestVertex), 10.0f, CYAN);
-    auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, aPoints);
-    auto bProjection = CollisionAlgorithms::projectCircleOnToAxis(circleCollider->radius, circleTransform->position, axis);
-
-    drawAxis(drawList, axis);
-    drawPolygonOnAxis(drawList, axis, aPoints);
-    drawCircleOnAxis(drawList, axis, circleCollider->radius, circleTransform->position);
-    drawList->AddLine(toImVec2(closestVertex), toImVec2(circleTransform->position), GREEN);
-
-    if(aProjection.min >= bProjection.max || bProjection.min >= aProjection.max)
-    {
-        collisionPoints.hasCollisions = false;
-        return;
-    }
-
-    float axisDepth = std::min(bProjection.max - aProjection.min, aProjection.max - bProjection.min);
-
-    if(axisDepth < collisionPoints.depth)
-    {
-        collisionPoints.depth = axisDepth;
-        collisionPoints.normal = axis;
-    }
-
-    Vector2 centerA = CollisionAlgorithms::getCenterPoint(aPoints);
-    Vector2 dir = circleTransform->position - centerA;
-
-    if(Vector2::dot(dir, collisionPoints.normal) < 0)
-        collisionPoints.normal *= -1;
-
+    
+    // drawList->AddLine(toImVec2(aTransform->position), toImVec2(closestPoint), GREEN);
+    // drawList->AddCircleFilled(toImVec2(closestPoint), 5.0f, CYAN);
 }
 
 Renderer::Renderer()
@@ -144,6 +175,7 @@ Renderer::Renderer()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     window = glfwCreateWindow(1920, 1080, "Flatlands", NULL, NULL);
+        
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
@@ -162,6 +194,11 @@ Renderer::Renderer()
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+}
+
+Renderer::~Renderer()
+{
+    destroy();
 }
 
 void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions)
@@ -203,8 +240,7 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
         for(std::shared_ptr<Entity>& entity : entities)
         {
             renderRigidBody(drawList, entity.get());
-        }
-
+        }       
 
         if(renderDebug)
         {
@@ -225,7 +261,7 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
             }
         }
 
-        // drawCollisionDetection(drawList, entities);
+        drawCollisionDetection(drawList, entities);
         ImGui::End();
     }
 
@@ -321,15 +357,9 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
     {
         Transform& transform = entity->rigidBody->transform;
         BoxCollider* boxCollider = (BoxCollider*) entity->collider.get();
+        drawBox(drawList, boxCollider, &transform);
 
-        auto points = boxCollider->transformPoints(&transform);
-        drawList->AddQuadFilled(
-            toImVec2(points[0]),
-            toImVec2(points[1]),
-            toImVec2(points[2]),
-            toImVec2(points[3]),
-            WHITE
-        );
+        
     }
     else if(dynamic_cast<ConvexPolygonCollider*>(entity->collider.get()))
     {
@@ -345,6 +375,13 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         };
 
         drawList->AddConvexPolyFilled(&pointsToDraw[0], vertices.size(), WHITE);
+    }
+    else if(dynamic_cast<CapsuleCollider*>(entity->collider.get()))
+    {
+        Transform& transform = entity->rigidBody->transform;
+        CapsuleCollider* capsuleCollider = dynamic_cast<CapsuleCollider*>(entity->collider.get());
+
+        drawCapsule(drawList, capsuleCollider, &transform, WHITE);
     }
 }
 
@@ -367,4 +404,38 @@ bool Renderer::running()
 Vector2 Renderer::getMousePosition()
 {
     return mousePosition;
+}
+
+void Renderer::drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Transform* transform, ImU32 colour)
+{
+    Vector2 position = transform->position;
+    float radius = capsule->GetWidth() / 2.0f;
+    float height = capsule->GetHeight();
+    float halfHeight = height / 2.0f;
+    Line centerLine = capsule->GetCenterLine(transform);
+
+    drawList->AddCircleFilled(toImVec2(centerLine.start), radius, colour);
+    drawList->AddCircleFilled(toImVec2(centerLine.end), radius, colour);
+
+    float boxHeight = halfHeight - radius;
+
+    drawList->AddQuadFilled(
+        toImVec2(Vector2(-radius, -boxHeight).rotate(transform->rotation) + transform->position),
+        toImVec2(Vector2(radius, -boxHeight).rotate(transform->rotation) + transform->position),
+        toImVec2(Vector2(radius, boxHeight).rotate(transform->rotation) + transform->position),
+        toImVec2(Vector2(-radius, boxHeight).rotate(transform->rotation) + transform->position),
+        colour
+    );
+}
+
+void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform)
+{
+    auto points = box->transformPoints(transform);
+    drawList->AddQuadFilled(
+        toImVec2(points[0]),
+        toImVec2(points[1]),
+        toImVec2(points[2]),
+        toImVec2(points[3]),
+        WHITE
+    );
 }

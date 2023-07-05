@@ -10,6 +10,7 @@
 #include <collision/colliders/LineCollider.h>
 #include <collision/colliders/BoxCollider.h>
 #include <collision/colliders/ConvexPolygonCollider.h>
+#include <collision/colliders/CapsuleCollider.h>
 #include <core/Time.h>
 #include <core/Logger.h>
 #include <Vector2.h>
@@ -21,8 +22,13 @@ DemoApp::DemoApp()
 
 void DemoApp::run()
 {
-    // createBox(Vector2(0.0f, 0.0f), 100, 100, 0.0f, 100.0f, 0.0f);
-    createNGon(Vector2(0, 0), 50, 3, 10.f);
+    createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f, true);
+    // createBox(Vector2(600, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
+    
+    // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
+    // createCircle(100.0f, Vector2(200.0f, 0), 1.0f, 0.0f, true);
+    createCircle(100.0f, Vector2(800.0f, 100), 1.0f, 0.0f);
+    // createNGon(Vector2(0, 0), 50, 3, 10.f);
     // createCircle(100.0f, Vector2(100.0f, 100.0f), 1.0f, 0.0f, true);
     // createBox(Vector2(-200, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
 
@@ -32,14 +38,17 @@ void DemoApp::run()
     // createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 100.0f, 0.0f);
 
     // Static boxes
-    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
-    createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.0f, 0.0f, true);
-    createBox(Vector2(1200.0f, 500.0f), 1500, 20, -0.2f, 0.0f, 0.0f, true);
+    // createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
+    // createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.0f, 0.0f, true);
+    // createBox(Vector2(1200.0f, 500.0f), 1500, 20, -0.2f, 0.0f, 0.0f, true);
 
     // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
 
-    float movementSpeed = 250.0f;
-    float angularSpeed = 10.0f;
+    // float movementSpeed = 10.0f;
+    // float angularSpeed = 10.0f;
+
+    float movementSpeed = 3.0f;
+    float angularSpeed = 0.1f;
     
     // entities[1]->rigidBody->addAngularForce(angularSpeed);
     
@@ -78,8 +87,18 @@ void DemoApp::run()
 
         if(ImGui::IsMouseClicked(0))
         {
-            float radius = rand() % 50;
-            createCircle(radius, renderer.getMousePosition(), 10.0f, 0.f);
+            int r = rand() % 2;
+            if(r == 0)
+            {
+                float width = rand() % 50;
+                float height = rand() % 100;
+                createCapsule(renderer.getMousePosition(), width, height, 10.0);
+            }
+            else
+            {
+                float radius = rand() % 50; 
+                createCircle(radius, renderer.getMousePosition(), 10.0f, 0.f);
+            }
         }
         else if(ImGui::IsMouseClicked(1))
         {
@@ -96,8 +115,11 @@ void DemoApp::run()
             createNGon(renderer.getMousePosition(), radius, numSides, 10.f, 0.0f);
         }
 
-        entities[0]->rigidBody->addForce(force);
-        entities[0]->rigidBody->addAngularForce(angularForce);
+        // entities[0]->rigidBody->addForce(force);
+        // entities[0]->rigidBody->addAngularForce(angularForce);
+
+        entities[0]->rigidBody->transform.position += force;
+        entities[0]->rigidBody->transform.rotation += angularForce;
 
         // //Interesting way of doing fixed timesteps but becomes slugish after a while
         // while(accumulator > TIME_STEP)
@@ -194,4 +216,22 @@ void DemoApp::createNGon(Vector2 position, float radius, size_t numSides, float 
 
     entities.push_back(entity);
     world.addRigidBody(rigidBody.get());
+}
+
+void DemoApp::createCapsule(Vector2 position, float width, float height, float mass, float restitution, bool isStatic)
+{
+    std::shared_ptr<CapsuleCollider> polygonCollider = std::make_shared<CapsuleCollider>(width, height);
+    std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(polygonCollider.get());
+    rigidBody->transform.position = position;
+    rigidBody->setMass(mass);
+    rigidBody->setRestitution(restitution);
+    rigidBody->setStatic(isStatic);
+
+    std::shared_ptr<Entity> entity = std::make_shared<Entity>();
+    entity->rigidBody = rigidBody;
+    entity->collider = polygonCollider;
+
+    entities.push_back(entity);
+    world.addRigidBody(rigidBody.get());
+
 }
