@@ -278,8 +278,6 @@ namespace CollisionAlgorithms
         return collisionPoints;
     }
 
-    
-
     inline CollisionPoints TestBoxCircleCollision(
         ConvexPolygonCollider* a, Transform* aTransform,
         CircleCollider* b, Transform* bTransform)
@@ -369,6 +367,42 @@ namespace CollisionAlgorithms
         return collisionPoints;
     }
 
+    inline CollisionPoints TestCapsuleCapsuleCollision(
+        CapsuleCollider* a, Transform* aTransform,
+        CapsuleCollider* b, Transform* bTransform
+    )
+    {
+        CollisionPoints collisionPoints;
+        Line aLine = a->GetCenterLine(aTransform);
+        Line bLine = a->GetCenterLine(bTransform);
+
+        ClosestVertexProjection closestVertexProjectionOnA = aLine.closestVertexOnLine({bLine.start, bLine.end});
+        ClosestVertexProjection closestVertexProjectionOnB = bLine.closestVertexOnLine({aLine.start, aLine.end});
+        ClosestVertexProjection closestVertexProjection = closestVertexProjectionOnA;
+
+        if(closestVertexProjectionOnB.distance < closestVertexProjectionOnA.distance)
+            closestVertexProjection = closestVertexProjectionOnB;
+
+        float aRadius = a->GetWidth() / 2.0f;
+        float bRadius = b->GetWidth() / 2.0f;
+        float radiusSum = aRadius + bRadius;
+
+        Vector2 bodyDir = bTransform->position - aTransform->position;
+
+        if(closestVertexProjection.distance < radiusSum)
+        {
+            Vector2 normal = (closestVertexProjection.projectedPoint - closestVertexProjection.vertex).normalize();
+            if(Vector2::dot(normal, bodyDir) < 0)
+                normal *= -1;
+
+            collisionPoints.normal = normal;
+            collisionPoints.depth = radiusSum - closestVertexProjection.distance;
+            collisionPoints.hasCollisions = true;
+        }
+
+        return collisionPoints;
+    }
+
     inline CollisionPoints TestCollision(
         Collider* aCollider, Transform* aTransform,
         Collider* bCollider, Transform* bTransform)
@@ -440,6 +474,14 @@ namespace CollisionAlgorithms
 
                 collisionPoints.normal *= -1;
                 return collisionPoints;
+
+            }
+            else if(bType == ColliderType::CAPSULE)
+            {
+                return TestCapsuleCapsuleCollision(
+                    dynamic_cast<CapsuleCollider*>(aCollider), aTransform, 
+                    dynamic_cast<CapsuleCollider*>(bCollider), bTransform
+                );
 
             }
             else
@@ -589,6 +631,25 @@ namespace CollisionAlgorithms
         collisionPoints->contacts.push_back(contact);
     }
 
+    inline void GenerateCapsuleCapsuleContactPoints(
+        CapsuleCollider* aCollider, Transform* aTransform,
+        CapsuleCollider* bCollider, Transform* bTransform,
+        CollisionPoints* collisionPoints)
+    {
+        // Vector2 dir = (bTransform->position - aTransform->position).normalize();
+        // Vector2 contact = aTransform->position + (dir * aCollider->radius);
+        // collisionPoints->contacts.emplace_back(std::move(contact));
+
+        float aRadius = aCollider->GetWidth() / 2.0f;
+        Line aLine = aCollider->GetCenterLine(aTransform);
+        Line bLine = bCollider->GetCenterLine(bTransform);
+        ClosestVertexProjection closestVertexProjection = aLine.closestVertexOnLine({bLine.start, bLine.end});
+        Vector2 contactPoint = closestVertexProjection.projectedPoint + (collisionPoints->normal * aRadius);
+
+        loginfo(contactPoint);
+        collisionPoints->contacts.push_back(std::move(contactPoint));
+    }
+
     inline void GenerateContactPoints(Collision& collision)
     {
         ColliderType aType = collision.a->collider->GetType();
@@ -659,6 +720,14 @@ namespace CollisionAlgorithms
                 GenerateCircleCapsuleContactPoints(
                     static_cast<CircleCollider*>(bCollider), bTransform,
                     static_cast<CapsuleCollider*>(aCollider), aTransform,
+                    &collision.collisionPoints
+                );
+            }
+            if(bType == ColliderType::CAPSULE)
+            {
+                GenerateCapsuleCapsuleContactPoints(
+                    static_cast<CapsuleCollider*>(aCollider), aTransform,
+                    static_cast<CapsuleCollider*>(bCollider), bTransform,
                     &collision.collisionPoints
                 );
             }

@@ -164,6 +164,75 @@ void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::sha
     // drawList->AddCircleFilled(toImVec2(closestPoint), 5.0f, CYAN);
 }
 
+void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform)
+{
+    Line aLine = a->GetCenterLine(aTransform);
+    Line bLine = a->GetCenterLine(bTransform);
+
+    drawList->AddLine(toImVec2(aLine.start), toImVec2(aLine.end), BLACK);
+    drawList->AddLine(toImVec2(bLine.start), toImVec2(bLine.end), BLACK);
+
+    ClosestVertexProjection closestVertexProjectionOnA = aLine.closestVertexOnLine({bLine.start, bLine.end});
+    ClosestVertexProjection closestVertexProjectionOnB = bLine.closestVertexOnLine({aLine.start, aLine.end});
+    ClosestVertexProjection closestVertexProjection = closestVertexProjectionOnA;
+
+    if(closestVertexProjectionOnB.distance < closestVertexProjectionOnA.distance)
+        closestVertexProjection = closestVertexProjectionOnB;
+
+    drawList->AddCircleFilled(toImVec2(closestVertexProjection.vertex), 3.0f, MAGENTA);
+    drawList->AddLine(toImVec2(closestVertexProjection.projectedPoint), toImVec2(closestVertexProjection.vertex), MAGENTA, 2.0f);
+
+    float aRadius = a->GetWidth() / 2.0f;
+    float bRadius = b->GetWidth() / 2.0f;
+    float radiusSum = aRadius + bRadius;
+
+    drawList->AddCircle(toImVec2(closestVertexProjection.vertex), aRadius, RED);
+    drawList->AddCircle(toImVec2(closestVertexProjection.projectedPoint), bRadius, RED);
+
+    Vector2 bodyDir = bTransform->position - aTransform->position;
+
+    if(closestVertexProjection.distance < radiusSum)
+    {
+        Vector2 normal = (closestVertexProjection.projectedPoint - closestVertexProjection.vertex).normalize();
+        if(Vector2::dot(normal, bodyDir) < 0)
+            normal *= -1;
+
+        float depth = radiusSum - closestVertexProjection.distance;
+        Transform translated = *aTransform;
+        translated.position -= normal * depth;
+
+        drawCapsule(drawList, a, &translated, BLUE);
+    }
+}
+
+void Renderer::drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform)
+{
+    float capsuleRadius = b->GetWidth() / 2.0f;
+    Line capsuleCenterLine = b->GetCenterLine(bTransform);
+    Vector2 closestPoint = capsuleCenterLine.closestPointOnLine(aTransform->position);
+    float distanceToCircle = Vector2::distance(closestPoint, aTransform->position);
+    float radiusSum = capsuleRadius + a->radius;
+
+    if(distanceToCircle <= radiusSum)
+    {
+        Vector2 direction = aTransform->position - closestPoint;
+        Vector2 contact = aTransform->position + (-direction.normalize() * a->radius);
+        float depth = radiusSum - direction.magnitude();
+        
+        // Vector2 normal = direction.normalize();
+        Vector2 end = contact + (direction.normalize() * depth);
+        drawList->AddLine(toImVec2(contact), toImVec2(end), RED, 2.0f);
+        drawList->AddCircleFilled(toImVec2(contact), 3.0f, RED);
+
+        Transform newTransform = *bTransform;
+        newTransform.position += (-direction.normalize() * depth);
+        drawCapsule(drawList, b, &newTransform, MAGENTA);
+    }
+    
+    drawList->AddLine(toImVec2(aTransform->position), toImVec2(closestPoint), GREEN);
+    drawList->AddCircleFilled(toImVec2(closestPoint), 5.0f, CYAN);
+}
+
 Renderer::Renderer()
 {
     glfwSetErrorCallback(glfw_error_callback);
@@ -262,6 +331,11 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
         }
 
         drawCollisionDetection(drawList, entities);
+
+        auto a = entities[0];
+        auto b = entities[1];
+
+        // drawCapsuleCapsueCollisionTest(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (CapsuleCollider*)b->collider.get(), &b->rigidBody->transform);
         ImGui::End();
     }
 
@@ -322,15 +396,7 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
     if(renderDebug)
     {
         AABBCollider aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
-        float width = std::abs(aabb.max.x - aabb.min.x);
-        float height = std::abs(aabb.max.y - aabb.min.y);
-        drawList->AddQuad(
-            toImVec2(aabb.min),
-            toImVec2(aabb.min + Vector2(width, 0)),
-            toImVec2(aabb.max),
-            toImVec2(aabb.min + Vector2(0, height)),
-            GREEN
-        );
+        drawAABB(drawList, &aabb, GREEN);
     }
 
     if(dynamic_cast<CircleCollider*>(entity->collider.get()))
@@ -437,5 +503,18 @@ void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transf
         toImVec2(points[2]),
         toImVec2(points[3]),
         WHITE
+    );
+}
+
+void Renderer::drawAABB(ImDrawList* drawList, AABBCollider* aabb, ImU32 colour)
+{
+    float width = std::abs(aabb->max.x - aabb->min.x);
+    float height = std::abs(aabb->max.y - aabb->min.y);
+    drawList->AddQuad(
+        toImVec2(aabb->min),
+        toImVec2(aabb->min + Vector2(width, 0)),
+        toImVec2(aabb->max),
+        toImVec2(aabb->min + Vector2(0, height)),
+        GREEN
     );
 }

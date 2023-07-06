@@ -15,6 +15,7 @@
 #include <Vector2.h>
 #include <Entity.h>
 #include <collision/Collision.h>
+#include <Constants.h>
 
 class Renderer
 {
@@ -34,6 +35,13 @@ private:
     void drawPolygonOnAxis(ImDrawList* drawList, Vector2 axis, std::vector<Vector2> vertices);
     void drawCollisionDetection(ImDrawList* drawList, std::vector<std::shared_ptr<Entity>>& entities);
     void drawAxis(ImDrawList* drawList, Vector2 axis, float length=1000.0f);
+
+    void drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Transform* transform, ImU32 colour);
+    void drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform);
+    void drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
+    void drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
+    void drawAABB(ImDrawList* drawList, AABBCollider* aabb, ImU32 colour=GREEN);
+    
 private:
     GLFWwindow* window;
     float dt = 0;
@@ -41,6 +49,4 @@ private:
     ImVec2 windowSize = ImVec2(0, 0);
     bool renderDebug = false;
 
-    void drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Transform* transform, ImU32 colour);
-    void drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform);
 };

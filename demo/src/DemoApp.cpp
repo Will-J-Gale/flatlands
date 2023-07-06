@@ -22,12 +22,15 @@ DemoApp::DemoApp()
 
 void DemoApp::run()
 {
-    createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f, true);
+    // createBox(Vector2(600, 300), 100, 200, 0.0, 5.0, 0.1f);
+    // createBox(Vector2(800, 300), 100, 200, 0.0, 5.0, 0.1f);
+    createCapsule(Vector2(600, 300), 100, 200, 10.0, 0.1f);
+    createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f);
     // createBox(Vector2(600, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
     
     // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
     // createCircle(100.0f, Vector2(200.0f, 0), 1.0f, 0.0f, true);
-    createCircle(100.0f, Vector2(800.0f, 100), 1.0f, 0.0f);
+    // createCircle(100.0f, Vector2(800.0f, 100), 1.0f, 0.0f);
     // createNGon(Vector2(0, 0), 50, 3, 10.f);
     // createCircle(100.0f, Vector2(100.0f, 100.0f), 1.0f, 0.0f, true);
     // createBox(Vector2(-200, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
@@ -44,8 +47,8 @@ void DemoApp::run()
 
     // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
 
-    // float movementSpeed = 10.0f;
-    // float angularSpeed = 10.0f;
+    // float movementSpeed = 200.0f;
+    // float angularSpeed = 10000000.0f;
 
     float movementSpeed = 3.0f;
     float angularSpeed = 0.1f;
@@ -233,5 +236,4 @@ void DemoApp::createCapsule(Vector2 position, float width, float height, float m
 
     entities.push_back(entity);
     world.addRigidBody(rigidBody.get());
-
 }

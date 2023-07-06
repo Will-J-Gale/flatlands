@@ -5,8 +5,8 @@
 const float TIME_STEP = 1.0f / 150.0f;
 const int NUM_ITRERATIONS = 20;
 // const int NUM_ITRERATIONS = 1;
-const Vector2 GRAVITY = Vector2(0, 9.81 * 100.0f);
-// const Vector2 GRAVITY = Vector2(0,0);
+// const Vector2 GRAVITY = Vector2(0, 9.81 * 100.0f);
+const Vector2 GRAVITY = Vector2(0,0);
 
 //Colours
 const ImU32 WHITE = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
