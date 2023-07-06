@@ -22,28 +22,20 @@ CapsuleCollider::CapsuleCollider(float width, float height)
 
 AABBCollider CapsuleCollider::GetAABB(Transform* transform)
 {
-    //@TODO This is incorrect, the AAB is bigger when the capsule is rotated
-    Vector2 min = Vector2(Math::FLOAT_MAX, Math::FLOAT_MAX);
-    Vector2 max = Vector2(Math::FLOAT_MIN, Math::FLOAT_MIN);
+    Line transformedLine = GetCenterLine(transform);
+    Vector2 start = transformedLine.start;
+    Vector2 end = transformedLine.end;
+    AABBCollider aabb;
 
-    for(Vector2& vertex : aabbVertices)
-    {
-        Vector2 transformedVertex = vertex.rotate(transform->rotation) + transform->position;
+    aabb.min.x = std::min(start.x, end.x);
+    aabb.min.y = std::min(start.y, end.y);
+    aabb.max.x = std::max(start.x, end.x);
+    aabb.max.y = std::max(start.y, end.y);
 
-        if(transformedVertex.x < min.x)
-            min.x = transformedVertex.x;
+    aabb.min += (Vector2::left + Vector2::up) * radius;
+    aabb.max += (Vector2::right + Vector2::down) * radius;
 
-        if(transformedVertex.x > max.x)
-            max.x = transformedVertex.x;
-
-        if(transformedVertex.y < min.y)
-            min.y = transformedVertex.y;
-
-        if(transformedVertex.y > max.y)
-            max.y = transformedVertex.y;
-    }
-
-    return AABBCollider(min, max);
+    return aabb;
 }
 
 float CapsuleCollider::GetRotationalInertia(float mass)
