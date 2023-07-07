@@ -646,7 +646,6 @@ namespace CollisionAlgorithms
         ClosestVertexProjection closestVertexProjection = aLine.closestVertexOnLine({bLine.start, bLine.end});
         Vector2 contactPoint = closestVertexProjection.projectedPoint + (collisionPoints->normal * aRadius);
 
-        loginfo(contactPoint);
         collisionPoints->contacts.push_back(std::move(contactPoint));
     }
 
