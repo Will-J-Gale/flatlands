@@ -4,9 +4,9 @@
 CapsuleCollider::CapsuleCollider(float width, float height)
 {
     this->width = width;
-    this->height = height;
-    this->halfHeight = height / 2.0f;
     this->radius = width / 2.0f;
+    this->height = height > width ? height : width + 1;
+    this->halfHeight = this->height / 2.0f;
 
     float centerOffset = this->halfHeight - this->radius;
     this->centerLine.start = Vector2(0, centerOffset);

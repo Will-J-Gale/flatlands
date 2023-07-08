@@ -167,41 +167,55 @@ void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::sha
 void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform)
 {
     Line aLine = a->GetCenterLine(aTransform);
-    Line bLine = a->GetCenterLine(bTransform);
+    Line bLine = b->GetCenterLine(bTransform);
 
     drawList->AddLine(toImVec2(aLine.start), toImVec2(aLine.end), BLACK);
     drawList->AddLine(toImVec2(bLine.start), toImVec2(bLine.end), BLACK);
 
     ClosestVertexProjection closestVertexProjectionOnA = aLine.closestVertexOnLine({bLine.start, bLine.end});
     ClosestVertexProjection closestVertexProjectionOnB = bLine.closestVertexOnLine({aLine.start, aLine.end});
-    ClosestVertexProjection closestVertexProjection = closestVertexProjectionOnA;
+    ClosestVertexProjection closestProjection = closestVertexProjectionOnA;
+    bool vertexIsA = false;
 
     if(closestVertexProjectionOnB.distance < closestVertexProjectionOnA.distance)
-        closestVertexProjection = closestVertexProjectionOnB;
-
-    drawList->AddCircleFilled(toImVec2(closestVertexProjection.vertex), 3.0f, MAGENTA);
-    drawList->AddLine(toImVec2(closestVertexProjection.projectedPoint), toImVec2(closestVertexProjection.vertex), MAGENTA, 2.0f);
+    {
+        closestProjection = closestVertexProjectionOnB;
+        vertexIsA = true;
+    }
+    
+    drawList->AddCircleFilled(toImVec2(closestProjection.vertex), 3.0f, MAGENTA);
+    drawList->AddLine(toImVec2(closestProjection.projectedPoint), toImVec2(closestProjection.vertex), MAGENTA, 2.0f);
 
     float aRadius = a->GetWidth() / 2.0f;
     float bRadius = b->GetWidth() / 2.0f;
     float radiusSum = aRadius + bRadius;
 
-    drawList->AddCircle(toImVec2(closestVertexProjection.vertex), aRadius, RED);
-    drawList->AddCircle(toImVec2(closestVertexProjection.projectedPoint), bRadius, RED);
-
-    Vector2 bodyDir = bTransform->position - aTransform->position;
-
-    if(closestVertexProjection.distance < radiusSum)
+    if(vertexIsA)
     {
-        Vector2 normal = (closestVertexProjection.projectedPoint - closestVertexProjection.vertex).normalize();
-        if(Vector2::dot(normal, bodyDir) < 0)
-            normal *= -1;
+        drawList->AddCircle(toImVec2(closestProjection.vertex), aRadius, RED);
+        drawList->AddCircle(toImVec2(closestProjection.projectedPoint), bRadius, RED);
+    }
+    else
+    {
+        drawList->AddCircle(toImVec2(closestProjection.vertex), bRadius, RED);
+        drawList->AddCircle(toImVec2(closestProjection.projectedPoint), aRadius, RED);
+    }
 
-        float depth = radiusSum - closestVertexProjection.distance;
+    if(closestProjection.distance < radiusSum)
+    {
+        Vector2 normal = (closestProjection.projectedPoint - closestProjection.vertex).normalize();
+
+        float depth = radiusSum - closestProjection.distance;
         Transform translated = *aTransform;
         translated.position -= normal * depth;
 
         drawCapsule(drawList, a, &translated, BLUE);
+
+        float radiusOfVertex = vertexIsA ? aRadius : bRadius;
+        Vector2 dir = (closestProjection.projectedPoint - closestProjection.vertex).normalize();
+        Vector2 contactPoint = closestProjection.vertex + (dir * radiusOfVertex);
+
+        drawList->AddCircleFilled(toImVec2(contactPoint), 5.0f, GREEN);
     }
 }
 
@@ -242,6 +256,8 @@ void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider
     std::vector<Line> bEdges = b->getEdges(bTransform);
 
     ClosestVertexProjection closestProjection = centerLine.closestVertexOnLine(bPoints);
+    Line closestEdge = bEdges[0];
+    float closestEdgeDistance = Math::FLOAT_MAX;
 
     for(Line& edge : bEdges)
     {
@@ -249,11 +265,24 @@ void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider
 
         if(projection.distance < closestProjection.distance)
             closestProjection = projection;
+
+        Vector2 edgeCenter = edge.start + ((edge.end - edge.start) / 2.0f);
+        float edgeDistance = Vector2::distanceSquared(aTransform->position,  edgeCenter);
+
+        if(edgeDistance < closestEdgeDistance)
+        {
+            closestEdge = edge;
+            closestEdgeDistance = edgeDistance;
+        }
     }
+
+    Vector2 capsuleLineDir = (centerLine.end - centerLine.start).normalize();
+    Vector2 edgeDir = (closestEdge.end - closestEdge.start).normalize();
+    // loginfo(Vector2::dot(capsuleLineDir, edgeDir));
 
     drawList->AddCircleFilled(toImVec2(closestProjection.projectedPoint), 3.0f, GREEN);
     drawList->AddLine(toImVec2(closestProjection.vertex), toImVec2(closestProjection.projectedPoint), GREEN);
-
+    drawList->AddLine(toImVec2(closestEdge.start), toImVec2(closestEdge.end), GREEN);
 
     if(closestProjection.distance < aRadius)
     {
@@ -267,7 +296,7 @@ void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider
         Transform capsuleTransform = *aTransform;
         capsuleTransform.position -= normal * depth;
         drawCapsule(drawList, a, &capsuleTransform, BLUE);
-    }
+    }  
 }
 
 Renderer::Renderer()
@@ -357,11 +386,11 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
                     for(int i = 0; i < collision.collisionPoints.contacts.size(); i++)
                     {
                         Vector2 contact = collision.collisionPoints.contacts[i];
-                        drawList->AddCircleFilled(toImVec2(contact), 10.0f, GREEN);
+                        drawList->AddCircleFilled(toImVec2(contact), 10.0f, RED);
 
                         Vector2 frictionImpulse = collision.collisionPoints.frictionImpulses[i];
                         Vector2 impulseEnd = contact + (frictionImpulse * 1);
-                        drawList->AddLine(toImVec2(contact), toImVec2(impulseEnd), RED, 5.0f);
+                        drawList->AddLine(toImVec2(contact), toImVec2(impulseEnd), MAGENTA, 5.0f);
                     }
                 }
             }
@@ -371,9 +400,14 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
         auto a = entities[0];
         auto b = entities[1];
+        // drawCapsuleCapsuleCollisionTest(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (CapsuleCollider*)b->collider.get(), &b->rigidBody->transform);
 
-        // drawCapsuleCapsueCollisionTest(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (CapsuleCollider*)b->collider.get(), &b->rigidBody->transform);
         // drawCapsulePolygonCollision(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (ConvexPolygonCollider*)b->collider.get(), &b->rigidBody->transform);
+
+        // auto a2 = entities[3];
+        // auto b2 = entities[2];
+        // drawCapsulePolygonCollision(drawList, (CapsuleCollider*)a2->collider.get(), &a2->rigidBody->transform, (ConvexPolygonCollider*)b2->collider.get(), &b2->rigidBody->transform);
+
         ImGui::End();
     }
 

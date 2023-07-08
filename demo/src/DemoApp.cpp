@@ -24,13 +24,17 @@ void DemoApp::run()
 {
     // createBox(Vector2(600, 300), 100, 200, 0.0, 5.0, 0.1f);
     // createBox(Vector2(800, 300), 100, 200, 0.0, 5.0, 0.1f);
-    createCapsule(Vector2(600, 300), 100, 200, 10.0, 0.1f);
     // createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f);
-    createBox(Vector2(800, 300.0f), 100, 200, 0.2f, 100.0f, 0.0f);
+    // createBox(Vector2(300 - 0, 300.0f), 400, 200, 0.0f, 100.0f, 0.0f);
     
+    // createBox(Vector2(1200 - 10, 300.0f), 100, 200, 0.0f, 100.0f, 0.0f);
+    createCapsule(Vector2(300, 300), 20, 200, 0.1f, 10.0, 0.1f);
+    createCapsule(Vector2(300, 600), 100, 200, Math::PI / 2.0f, 10.0, 0.1f, true);
+
+
     // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
-    // createCircle(100.0f, Vector2(200.0f, 0), 1.0f, 0.0f, true);
-    // createCircle(100.0f, Vector2(800.0f, 100), 1.0f, 0.0f);
+    // createCircle(100.0f, Vector2(800.0f, 300), 1.0f, 0.0f, true);
+    // createCircle(50.0f, Vector2(800.0f, 100), 1.0f, 0.0f);
     // createNGon(Vector2(0, 0), 50, 3, 10.f);
     // createCircle(100.0f, Vector2(100.0f, 100.0f), 1.0f, 0.0f, true);
     // createBox(Vector2(-200, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
@@ -47,11 +51,11 @@ void DemoApp::run()
 
     // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
 
-    float movementSpeed = 200.0f;
-    float angularSpeed = 10000000.0f;
+    // float movementSpeed = 200.0f;
+    // // float angularSpeed = 10000000.0f;
 
-    // float movementSpeed = 3.0f;
-    // float angularSpeed = 0.1f;
+    float movementSpeed = 3.0f;
+    float angularSpeed = 0.1f;
     
     // entities[1]->rigidBody->addAngularForce(angularSpeed);
     
@@ -91,16 +95,18 @@ void DemoApp::run()
         if(ImGui::IsMouseClicked(0))
         {
             int r = rand() % 2;
+
             if(r == 0)
             {
                 float width = rand() % 50;
                 float height = rand() % 100;
-                createCapsule(renderer.getMousePosition(), width, height, 10.0);
+                createCapsule(renderer.getMousePosition(), width, height, 0.1, 10.0f, 0.01f);
             }
             else
             {
                 float radius = rand() % 50; 
                 createCircle(radius, renderer.getMousePosition(), 10.0f, 0.f);
+                
             }
         }
         else if(ImGui::IsMouseClicked(1))
@@ -118,11 +124,11 @@ void DemoApp::run()
             createNGon(renderer.getMousePosition(), radius, numSides, 10.f, 0.0f);
         }
 
-        entities[0]->rigidBody->addForce(force);
-        entities[0]->rigidBody->addAngularForce(angularForce);
+        // entities[0]->rigidBody->addForce(force);
+        // entities[0]->rigidBody->addAngularForce(angularForce);
 
-        // entities[0]->rigidBody->transform.position += force;
-        // entities[0]->rigidBody->transform.rotation += angularForce;
+        entities[0]->rigidBody->transform.position += force;
+        entities[0]->rigidBody->transform.rotation += angularForce;
 
         // //Interesting way of doing fixed timesteps but becomes slugish after a while
         // while(accumulator > TIME_STEP)
@@ -221,11 +227,12 @@ void DemoApp::createNGon(Vector2 position, float radius, size_t numSides, float 
     world.addRigidBody(rigidBody.get());
 }
 
-void DemoApp::createCapsule(Vector2 position, float width, float height, float mass, float restitution, bool isStatic)
+void DemoApp::createCapsule(Vector2 position, float width, float height, float rotation, float mass, float restitution, bool isStatic)
 {
     std::shared_ptr<CapsuleCollider> polygonCollider = std::make_shared<CapsuleCollider>(width, height);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(polygonCollider.get());
     rigidBody->transform.position = position;
+    rigidBody->transform.rotation = rotation;
     rigidBody->setMass(mass);
     rigidBody->setRestitution(restitution);
     rigidBody->setStatic(isStatic);
