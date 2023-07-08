@@ -40,6 +40,7 @@ private:
     void drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform);
     void drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
     void drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
+    void drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, ConvexPolygonCollider* b, Transform* bTransform);
     void drawAABB(ImDrawList* drawList, AABBCollider* aabb, ImU32 colour=GREEN);
     
 private:

@@ -233,6 +233,43 @@ void Renderer::drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollid
     drawList->AddCircleFilled(toImVec2(closestPoint), 5.0f, CYAN);
 }
 
+void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, ConvexPolygonCollider* b, Transform* bTransform)
+{
+    float aRadius = a->GetWidth() / 2.0f;
+    Line centerLine = a->GetCenterLine(aTransform);
+    std::vector<Vector2> centerLineVertices = {centerLine.start, centerLine.end};
+    std::vector<Vector2> bPoints = b->transformPoints(bTransform);
+    std::vector<Line> bEdges = b->getEdges(bTransform);
+
+    ClosestVertexProjection closestProjection = centerLine.closestVertexOnLine(bPoints);
+
+    for(Line& edge : bEdges)
+    {
+        ClosestVertexProjection projection = edge.closestVertexOnLine(centerLineVertices);
+
+        if(projection.distance < closestProjection.distance)
+            closestProjection = projection;
+    }
+
+    drawList->AddCircleFilled(toImVec2(closestProjection.projectedPoint), 3.0f, GREEN);
+    drawList->AddLine(toImVec2(closestProjection.vertex), toImVec2(closestProjection.projectedPoint), GREEN);
+
+
+    if(closestProjection.distance < aRadius)
+    {
+        Vector2 normal = (closestProjection.projectedPoint - closestProjection.vertex).normalize();
+        float depth = aRadius - closestProjection.distance;
+
+        Vector2 bodyDir = bTransform->position - aTransform->position;
+        if(Vector2::dot(bodyDir, normal) < 0)
+            normal *= -1;
+
+        Transform capsuleTransform = *aTransform;
+        capsuleTransform.position -= normal * depth;
+        drawCapsule(drawList, a, &capsuleTransform, BLUE);
+    }
+}
+
 Renderer::Renderer()
 {
     glfwSetErrorCallback(glfw_error_callback);
@@ -330,12 +367,13 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
             }
         }
 
-        drawCollisionDetection(drawList, entities);
+        // drawCollisionDetection(drawList, entities);
 
         auto a = entities[0];
         auto b = entities[1];
 
         // drawCapsuleCapsueCollisionTest(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (CapsuleCollider*)b->collider.get(), &b->rigidBody->transform);
+        // drawCapsulePolygonCollision(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (ConvexPolygonCollider*)b->collider.get(), &b->rigidBody->transform);
         ImGui::End();
     }
 

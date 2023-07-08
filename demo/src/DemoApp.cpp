@@ -25,8 +25,8 @@ void DemoApp::run()
     // createBox(Vector2(600, 300), 100, 200, 0.0, 5.0, 0.1f);
     // createBox(Vector2(800, 300), 100, 200, 0.0, 5.0, 0.1f);
     createCapsule(Vector2(600, 300), 100, 200, 10.0, 0.1f);
-    createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f);
-    // createBox(Vector2(600, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
+    // createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f);
+    createBox(Vector2(800, 300.0f), 100, 200, 0.2f, 100.0f, 0.0f);
     
     // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
     // createCircle(100.0f, Vector2(200.0f, 0), 1.0f, 0.0f, true);
@@ -41,17 +41,17 @@ void DemoApp::run()
     // createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 100.0f, 0.0f);
 
     // Static boxes
-    // createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
-    // createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.0f, 0.0f, true);
-    // createBox(Vector2(1200.0f, 500.0f), 1500, 20, -0.2f, 0.0f, 0.0f, true);
+    createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
+    createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.0f, 0.0f, true);
+    createBox(Vector2(1200.0f, 500.0f), 1500, 20, -0.2f, 0.0f, 0.0f, true);
 
     // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
 
-    // float movementSpeed = 200.0f;
-    // float angularSpeed = 10000000.0f;
+    float movementSpeed = 200.0f;
+    float angularSpeed = 10000000.0f;
 
-    float movementSpeed = 3.0f;
-    float angularSpeed = 0.1f;
+    // float movementSpeed = 3.0f;
+    // float angularSpeed = 0.1f;
     
     // entities[1]->rigidBody->addAngularForce(angularSpeed);
     
@@ -118,11 +118,11 @@ void DemoApp::run()
             createNGon(renderer.getMousePosition(), radius, numSides, 10.f, 0.0f);
         }
 
-        // entities[0]->rigidBody->addForce(force);
-        // entities[0]->rigidBody->addAngularForce(angularForce);
+        entities[0]->rigidBody->addForce(force);
+        entities[0]->rigidBody->addAngularForce(angularForce);
 
-        entities[0]->rigidBody->transform.position += force;
-        entities[0]->rigidBody->transform.rotation += angularForce;
+        // entities[0]->rigidBody->transform.position += force;
+        // entities[0]->rigidBody->transform.rotation += angularForce;
 
         // //Interesting way of doing fixed timesteps but becomes slugish after a while
         // while(accumulator > TIME_STEP)

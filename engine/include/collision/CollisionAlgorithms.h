@@ -193,6 +193,7 @@ namespace CollisionAlgorithms
         ConvexPolygonCollider* b, Transform* bTransform)
     {
         CollisionPoints collisionPoints;
+        
 
         return collisionPoints;
     }
@@ -403,6 +404,45 @@ namespace CollisionAlgorithms
         return collisionPoints;
     }
 
+    inline CollisionPoints TestCapsulePolygonCollision(
+        CapsuleCollider* aCollider, Transform* aTransform,
+        ConvexPolygonCollider* bCollider, Transform* bTransform
+    )
+    {
+        CollisionPoints collisionPoints;
+
+        float aRadius = aCollider->GetWidth() / 2.0f;
+        Line centerLine = aCollider->GetCenterLine(aTransform);
+        std::vector<Vector2> centerLineVertices = {centerLine.start, centerLine.end};
+        std::vector<Vector2> bPoints = bCollider->transformPoints(bTransform);
+        std::vector<Line> bEdges = bCollider->getEdges(bTransform);
+
+        ClosestVertexProjection closestProjection = centerLine.closestVertexOnLine(bPoints);
+
+        for(Line& edge : bEdges)
+        {
+            ClosestVertexProjection projection = edge.closestVertexOnLine(centerLineVertices);
+
+            if(projection.distance < closestProjection.distance)
+                closestProjection = projection;
+        }
+
+        if(closestProjection.distance < aRadius)
+        {
+            Vector2 normal = (closestProjection.projectedPoint - closestProjection.vertex).normalize();
+            Vector2 bodyDir = bTransform->position - aTransform->position;
+
+            if(Vector2::dot(bodyDir, normal) < 0)
+                normal *= -1;
+            
+            collisionPoints.normal = normal;
+            collisionPoints.depth = aRadius - closestProjection.distance;
+            collisionPoints.hasCollisions = true;
+        }
+
+        return collisionPoints;
+    }
+
     inline CollisionPoints TestCollision(
         Collider* aCollider, Transform* aTransform,
         Collider* bCollider, Transform* bTransform)
@@ -425,6 +465,16 @@ namespace CollisionAlgorithms
                     dynamic_cast<ConvexPolygonCollider*>(aCollider), aTransform, 
                     dynamic_cast<CircleCollider*>(bCollider), bTransform
                 );
+            }
+            else if(bType == ColliderType::CAPSULE)
+            {
+                CollisionPoints collisionPoints = TestCapsulePolygonCollision(
+                    dynamic_cast<CapsuleCollider*>(bCollider), bTransform, 
+                    dynamic_cast<ConvexPolygonCollider*>(aCollider), aTransform
+                );
+
+                collisionPoints.normal *= -1;
+                return collisionPoints;
             }
             else
             {
@@ -483,6 +533,13 @@ namespace CollisionAlgorithms
                     dynamic_cast<CapsuleCollider*>(bCollider), bTransform
                 );
 
+            }
+            else if(bType == ColliderType::POLYGON)
+            {
+                return TestCapsulePolygonCollision(
+                    dynamic_cast<CapsuleCollider*>(aCollider), aTransform, 
+                    dynamic_cast<ConvexPolygonCollider*>(bCollider), bTransform
+                );
             }
             else
             {
@@ -636,10 +693,6 @@ namespace CollisionAlgorithms
         CapsuleCollider* bCollider, Transform* bTransform,
         CollisionPoints* collisionPoints)
     {
-        // Vector2 dir = (bTransform->position - aTransform->position).normalize();
-        // Vector2 contact = aTransform->position + (dir * aCollider->radius);
-        // collisionPoints->contacts.emplace_back(std::move(contact));
-
         float aRadius = aCollider->GetWidth() / 2.0f;
         Line aLine = aCollider->GetCenterLine(aTransform);
         Line bLine = bCollider->GetCenterLine(bTransform);
@@ -647,6 +700,43 @@ namespace CollisionAlgorithms
         Vector2 contactPoint = closestVertexProjection.projectedPoint + (collisionPoints->normal * aRadius);
 
         collisionPoints->contacts.push_back(std::move(contactPoint));
+    }
+
+    inline void GenerateCapsulePolygonContactPoints(
+        CapsuleCollider* aCollider, Transform* aTransform,
+        ConvexPolygonCollider* bCollider, Transform* bTransform,
+        CollisionPoints* collisionPoints
+    )
+    {
+        // This can be optimized, it's recalculating things that have
+        // already been calculated in TestCapsulePolygonCollision
+
+        bool vertexIsOnBox = true;
+        float aRadius = aCollider->GetWidth() / 2.0f;
+        Line centerLine = aCollider->GetCenterLine(aTransform);
+        std::vector<Vector2> centerLineVertices = {centerLine.start, centerLine.end};
+        std::vector<Vector2> bPoints = bCollider->transformPoints(bTransform);
+        std::vector<Line> bEdges = bCollider->getEdges(bTransform);
+
+        //Project all the box points onto the capsule line and return the closest vertex and the projected point
+        ClosestVertexProjection closestProjection = centerLine.closestVertexOnLine(bPoints);
+
+        //Project the capsule points onto each edge of the box
+        for(Line& edge : bEdges)
+        {
+            ClosestVertexProjection projection = edge.closestVertexOnLine(centerLineVertices);
+
+            if(projection.distance < closestProjection.distance)
+            {
+                closestProjection = projection;
+                vertexIsOnBox = false;
+            }
+        }
+
+        if(vertexIsOnBox)
+            collisionPoints->contacts.push_back(closestProjection.vertex);
+        else
+            collisionPoints->contacts.push_back(closestProjection.projectedPoint);
     }
 
     inline void GenerateContactPoints(Collision& collision)
@@ -672,6 +762,14 @@ namespace CollisionAlgorithms
             {
                 GenerateCircleBoxContactPoints(
                     static_cast<CircleCollider*>(bCollider), bTransform,
+                    static_cast<ConvexPolygonCollider*>(aCollider), aTransform,
+                    &collision.collisionPoints
+                );
+            }
+            else if(bType == ColliderType::CAPSULE)
+            {
+                GenerateCapsulePolygonContactPoints(
+                    static_cast<CapsuleCollider*>(bCollider), bTransform,
                     static_cast<ConvexPolygonCollider*>(aCollider), aTransform,
                     &collision.collisionPoints
                 );
@@ -722,11 +820,19 @@ namespace CollisionAlgorithms
                     &collision.collisionPoints
                 );
             }
-            if(bType == ColliderType::CAPSULE)
+            else if(bType == ColliderType::CAPSULE)
             {
                 GenerateCapsuleCapsuleContactPoints(
                     static_cast<CapsuleCollider*>(aCollider), aTransform,
                     static_cast<CapsuleCollider*>(bCollider), bTransform,
+                    &collision.collisionPoints
+                );
+            }
+            else if(bType == ColliderType::POLYGON)
+            {
+                GenerateCapsulePolygonContactPoints(
+                    static_cast<CapsuleCollider*>(aCollider), aTransform,
+                    static_cast<ConvexPolygonCollider*>(bCollider), bTransform,
                     &collision.collisionPoints
                 );
             }
