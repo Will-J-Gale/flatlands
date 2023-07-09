@@ -31,7 +31,7 @@ void DemoApp::run()
     // createCapsule(Vector2(300, 300), 20, 200, 0.1f, 10.0, 0.1f);
     // createCapsule(Vector2(300, 600), 100, 200, Math::PI / 2.0f, 10.0, 0.1f, true);
 
-    createCircle(50.0f, Vector2(400.0f, 100), 1.0f, 0.0f);
+    // createCircle(50.0f, Vector2(400.0f, 100), 10.0f, 0.0f);
 
 
     // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
@@ -149,9 +149,9 @@ void DemoApp::createCircle(float radius, Vector2 position, float mass, float res
 {
     std::shared_ptr<CircleCollider> circleCollider = std::make_shared<CircleCollider>(radius);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(circleCollider.get());
-    rigidBody->setStatic(isStatic);
-    rigidBody->setMass(mass);
-    rigidBody->setRestitution(restitution);
+    rigidBody->SetStatic(isStatic);
+    rigidBody->SetMass(mass);
+    rigidBody->SetRestitution(restitution);
     rigidBody->transform.position.set(position); 
 
     std::shared_ptr<Entity> entity = std::make_shared<Entity>();
@@ -166,7 +166,7 @@ void DemoApp::createLine(Vector2 start, Vector2 end, bool isStatic)
 {
     std::shared_ptr<LineCollider> lineCollider = std::make_shared<LineCollider>(start, end);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(lineCollider.get());
-    rigidBody->setStatic(isStatic);
+    rigidBody->SetStatic(isStatic);
 
     Vector2 position = start + ((end - start) / 2.0f);
     rigidBody->transform.position = position;
@@ -185,9 +185,9 @@ void DemoApp::createBox(Vector2 position, float width, float height, float rotat
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(boxCollider.get());
     rigidBody->transform.position = position;
     rigidBody->transform.rotation = rotation;
-    rigidBody->setMass(mass);
-    rigidBody->setRestitution(restitution);
-    rigidBody->setStatic(isStatic);
+    rigidBody->SetMass(mass);
+    rigidBody->SetRestitution(restitution);
+    rigidBody->SetStatic(isStatic);
 
     std::shared_ptr<Entity> entity = std::make_shared<Entity>();
     entity->rigidBody = rigidBody;
@@ -218,9 +218,9 @@ void DemoApp::createNGon(Vector2 position, float radius, size_t numSides, float 
     std::shared_ptr<ConvexPolygonCollider> polygonCollider = std::make_shared<ConvexPolygonCollider>(vertices);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(polygonCollider.get());
     rigidBody->transform.position = position;
-    rigidBody->setMass(mass);
-    rigidBody->setRestitution(restitution);
-    rigidBody->setStatic(isStatic);
+    rigidBody->SetMass(mass);
+    rigidBody->SetRestitution(restitution);
+    rigidBody->SetStatic(isStatic);
 
     std::shared_ptr<Entity> entity = std::make_shared<Entity>();
     entity->rigidBody = rigidBody;
@@ -236,9 +236,9 @@ void DemoApp::createCapsule(Vector2 position, float width, float height, float r
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(polygonCollider.get());
     rigidBody->transform.position = position;
     rigidBody->transform.rotation = rotation;
-    rigidBody->setMass(mass);
-    rigidBody->setRestitution(restitution);
-    rigidBody->setStatic(isStatic);
+    rigidBody->SetMass(mass);
+    rigidBody->SetRestitution(restitution);
+    rigidBody->SetStatic(isStatic);
 
     std::shared_ptr<Entity> entity = std::make_shared<Entity>();
     entity->rigidBody = rigidBody;

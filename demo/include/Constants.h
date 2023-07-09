@@ -10,6 +10,7 @@ const Vector2 GRAVITY = Vector2(0, 9.81 * 100.0f);
 
 //Colours
 const ImU32 WHITE = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+const ImU32 WHITE_A = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 0.3f));
 const ImU32 BLACK = ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 const ImU32 RED = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 const ImU32 GREEN = ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 1.0f, 0.0f, 1.0f));

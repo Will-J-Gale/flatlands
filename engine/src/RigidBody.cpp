@@ -15,24 +15,33 @@ RigidBody::RigidBody(Collider* collider)
 RigidBody::RigidBody(Collider* collider,  float mass, float friction, float elasticity, bool isStatic)
 {
     this->collider = collider;
-    this->setMass(mass);
+    this->SetMass(mass);
     // this->setFriction(friction);
-    this->setStatic(isStatic);
-    this->setRestitution(elasticity);
+    this->SetStatic(isStatic);
+    this->SetRestitution(elasticity);
 }
 
-void RigidBody::addCollider(Collider* collider)
+void RigidBody::AddCollider(Collider* collider)
 {
     this->collider = collider;
 }
 
-void RigidBody::addForce(Vector2 force)
+void RigidBody::ApplyGravity(Vector2 gravity)
 {
-    this->force += force / mass;
+    if(isAwake)
+        this->velocity += gravity;
 }
 
-void RigidBody::addAngularForce(float angularForce)
+void RigidBody::AddForce(Vector2 force)
 {
+    WakeUp();
+    this->force += force * invMass;
+}
+
+void RigidBody::AddAngularForce(float angularForce)
+{
+    isAwake = true;
+    notMovingCounter = 0;
     this->angularAcceleration += angularForce / mass;
 }
 
@@ -41,13 +50,13 @@ void RigidBody::addAngularForce(float angularForce)
 //     this->friction = friction;
 // }
 
-void RigidBody::setStatic(bool isStatic)
+void RigidBody::SetStatic(bool isStatic)
 {
     this->isStatic = isStatic;
-    this->setMass(this->mass);
+    this->SetMass(this->mass);
 }
 
-void RigidBody::setMass(float mass)
+void RigidBody::SetMass(float mass)
 {
     this->mass = std::max(mass, 0.0f);
     this->invMass = mass > 0 ? 1 / mass : 0.0f;
@@ -68,7 +77,46 @@ void RigidBody::setMass(float mass)
     }
 }
 
-void RigidBody::setRestitution(float elasticity)
+void RigidBody::SetRestitution(float elasticity)
 {
     this->restitution = elasticity;
+}
+
+void RigidBody::Step(float dt)
+{
+    if(!isAwake || isStatic)
+        return;
+    
+    previousPosition = transform.position;
+
+    velocity += dt * (force * invMass);
+    transform.position += velocity * dt;
+
+    angularVelocity += angularAcceleration * invRotationalInertia * dt;
+    transform.rotation += angularVelocity * dt;
+
+    force.set(0.0f, 0.0f);
+    angularAcceleration = 0.0f;
+}
+
+void RigidBody::CheckAwake()
+{
+    if(isStatic || !isAwake)
+        return;
+
+    float movement = (transform.position - previousPosition).magnitude();
+
+    if(movement < NOT_MOVING_THRESHOLD)
+        notMovingCounter++;
+
+    if(notMovingCounter >= SLEEP_COUNT)
+        isAwake = false;
+
+    previousPosition = transform.position;
+}
+
+void RigidBody::WakeUp()
+{
+    isAwake = true;
+    notMovingCounter = 0;
 }

@@ -33,6 +33,7 @@ struct Vector2
     static float distance(const Vector2& a, const Vector2& b);
     static float distanceSquared(const Vector2& a, const Vector2& b);
     static bool nearlyEqual(const Vector2& a, const Vector2& b, float epsilon=Math::EPSILON);
+    static bool nearlyEqual(const Vector2& a, const float& value, float epsilon=Math::EPSILON);
     static Vector2 findCenterPoint(std::vector<Vector2>& vertices);
     static Vector2 abs(const Vector2& v);
     static Vector2 left;

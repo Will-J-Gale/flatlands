@@ -38,7 +38,7 @@ private:
     void drawAxis(ImDrawList* drawList, Vector2 axis, float length=1000.0f);
 
     void drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Transform* transform, ImU32 colour);
-    void drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform);
+    void drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform, ImU32 colour=WHITE);
     void drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
     void drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
     void drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, ConvexPolygonCollider* b, Transform* bTransform);

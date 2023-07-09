@@ -470,12 +470,12 @@ ImVec2 Renderer::toImVec2(Vector2 v)
 }
 void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
 {
-    ImVec2 windowSize = ImGui::GetWindowSize();
-    ImVec2 windowCenter;
-    windowCenter.x = windowSize.x / 2;
-    windowCenter.y = windowSize.y / 2;
-
-    Vector2 pos = entity->rigidBody->transform.position;
+    RigidBody* rigidBody = entity->rigidBody.get();
+    Collider* collider = entity->rigidBody->collider;
+    Transform* transform = &entity->rigidBody->transform;
+    Vector2 pos = transform->position;
+    float rotation = transform->rotation;
+    ImU32 bodyColour = rigidBody->isAwake ? WHITE : WHITE_A;
 
     if(renderDebug)
     {
@@ -483,46 +483,39 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         drawAABB(drawList, &aabb, GREEN);
     }
 
-    if(dynamic_cast<CircleCollider*>(entity->collider.get()))
+    if(dynamic_cast<CircleCollider*>(collider))
     {
-        CircleCollider* circleCollider = (CircleCollider*)entity->collider.get();
+        CircleCollider* circleCollider = (CircleCollider*)collider;
         float radius = circleCollider->radius;
-        float rotation = entity->rigidBody->transform.rotation;
         Vector2 dir = Vector2(radius * std::cos(rotation), radius *std::sin(rotation));
 
-        drawList->AddCircleFilled(toImVec2(pos), radius, WHITE);
+        drawList->AddCircleFilled(toImVec2(pos), radius, bodyColour);
         drawList->AddLine(toImVec2(pos), toImVec2(pos + dir), BLACK);
     }
 
-    else if(dynamic_cast<LineCollider*>(entity->collider.get()))
+    else if(dynamic_cast<LineCollider*>(collider))
     {
-        Transform& transform = entity->rigidBody->transform;
-        LineCollider* lineCollider = (LineCollider*)entity->collider.get();
+        LineCollider* lineCollider = (LineCollider*)collider;
+        std::vector<Vector2> points = lineCollider->transformPoints(transform); 
 
-        std::vector<Vector2> points = lineCollider->transformPoints(&transform); 
-
-        drawList->AddLine(toImVec2(points[0]), toImVec2(points[1]), WHITE);
+        drawList->AddLine(toImVec2(points[0]), toImVec2(points[1]), bodyColour);
     }
-    else if(dynamic_cast<BoxCollider*>(entity->collider.get()))
+    else if(dynamic_cast<BoxCollider*>(collider))
     {
-        Transform& transform = entity->rigidBody->transform;
-        BoxCollider* boxCollider = (BoxCollider*) entity->collider.get();
-        drawBox(drawList, boxCollider, &transform);
+        BoxCollider* boxCollider = (BoxCollider*)collider;
+        drawBox(drawList, boxCollider, transform, bodyColour);
     }
-    else if(dynamic_cast<LineCollider*>(entity->collider.get()))
+    else if(dynamic_cast<LineCollider*>(collider))
     {
-        Transform& transform = entity->rigidBody->transform;
-        LineCollider* lineCollider = dynamic_cast<LineCollider*>(entity->collider.get());
-
-        Line line = lineCollider->transformLine(&transform);
-        drawList->AddLine(toImVec2(line.start), toImVec2(line.end), WHITE, 2.0f);
+        LineCollider* lineCollider = dynamic_cast<LineCollider*>(collider);
+        Line line = lineCollider->transformLine(transform);
+        drawList->AddLine(toImVec2(line.start), toImVec2(line.end), bodyColour, 2.0f);
     }
-    else if(dynamic_cast<ConvexPolygonCollider*>(entity->collider.get()))
+    else if(dynamic_cast<ConvexPolygonCollider*>(collider))
     {
-        Transform& transform = entity->rigidBody->transform;
-        ConvexPolygonCollider* polyCollider = dynamic_cast<ConvexPolygonCollider*>(entity->collider.get());
+        ConvexPolygonCollider* polyCollider = dynamic_cast<ConvexPolygonCollider*>(collider);
 
-        std::vector<Vector2> vertices = polyCollider->transformPoints(&transform);
+        std::vector<Vector2> vertices = polyCollider->transformPoints(transform);
         std::vector<ImVec2> pointsToDraw;
 
         for(size_t i = 0; i < vertices.size(); i++)
@@ -530,14 +523,13 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
             pointsToDraw.push_back(std::move(toImVec2(vertices[i])));
         };
 
-        drawList->AddConvexPolyFilled(&pointsToDraw[0], vertices.size(), WHITE);
+        drawList->AddConvexPolyFilled(&pointsToDraw[0], vertices.size(), bodyColour);
     }
-    else if(dynamic_cast<CapsuleCollider*>(entity->collider.get()))
+    else if(dynamic_cast<CapsuleCollider*>(collider))
     {
-        Transform& transform = entity->rigidBody->transform;
-        CapsuleCollider* capsuleCollider = dynamic_cast<CapsuleCollider*>(entity->collider.get());
+        CapsuleCollider* capsuleCollider = dynamic_cast<CapsuleCollider*>(collider);
 
-        drawCapsule(drawList, capsuleCollider, &transform, WHITE);
+        drawCapsule(drawList, capsuleCollider, transform, bodyColour);
     }
 }
 
@@ -584,7 +576,7 @@ void Renderer::drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Trans
     );
 }
 
-void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform)
+void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform, ImU32 colour)
 {
     auto points = box->transformPoints(transform);
     drawList->AddQuadFilled(
@@ -592,7 +584,7 @@ void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transf
         toImVec2(points[1]),
         toImVec2(points[2]),
         toImVec2(points[3]),
-        WHITE
+        colour
     );
 }
 

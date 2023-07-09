@@ -4,8 +4,6 @@
 #include <collision/CollisionAlgorithms.h>
 #include <core/Logger.h>
 
-#define PI 3.14159
-
 LineCollider::LineCollider()
 {
 }

@@ -38,6 +38,11 @@ void World::SubStep(float dt)
     NarrowPhaseDetection(broadPhaseResult.potentialCollisions);
     ResolveCollisions();
 
+    for(RigidBody* body : bodies)
+    {
+        body->CheckAwake();
+    }
+
     metrics.broadPhaseChecks += broadPhaseResult.numChecks;
     metrics.broadPhaseTime += broadPhaseResult.timeTaken;
 }
@@ -50,15 +55,9 @@ void World::MoveRigidBodies(float dt)
     {
         if(body->isStatic)
             continue;
-
-        body->velocity += dt * this->gravity + (body->force * body->invMass);
-        body->transform.position += body->velocity * dt;
-
-        body->angularVelocity += body->angularAcceleration * body->invRotationalInertia * dt;
-        body->transform.rotation += body->angularVelocity * dt;
-
-        body->force.set(0.0f, 0.0f);
-        body->angularAcceleration = 0.0f;
+        
+        body->ApplyGravity(dt * this->gravity);
+        body->Step(dt);
     }
 
     metrics.moveBodiesTime += Time::time() - moveBodiesStart;
@@ -72,7 +71,27 @@ void World::NarrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCo
         RigidBody* a = potentialCollision.a;
         RigidBody* b = potentialCollision.b;
 
+        /*  
+            Ignore collision truth table
+            
+            ----------------------------------
+            static      | static    | true
+            static      | awake   | false
+            awake       | static    | false
+            awake       | awake   | false
+            ----------------------------------
+        */
+
         if(a->isStatic && b->isStatic)
+            continue;
+        
+        if(!a->isAwake && !b->isAwake)
+            continue;
+        
+        if(!a->isAwake && b->isStatic)
+            continue;
+        
+        if(a->isStatic && !b->isAwake)
             continue;
         
         metrics.narrowPhaseChecks += 1;
@@ -96,6 +115,11 @@ void World::NarrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCo
                 a->transform.position += (-penetrationResolution / 2.0f);
                 b->transform.position += (penetrationResolution / 2.0f);
             }
+
+            if(!a->isAwake)
+                a->WakeUp();
+            if(!b->isAwake)
+                b->WakeUp();
 
             Collision collision = Collision(a, b, collisionPoints);
             CollisionAlgorithms::GenerateContactPoints(collision);

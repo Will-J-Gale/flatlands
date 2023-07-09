@@ -184,6 +184,11 @@ bool Vector2::nearlyEqual(const Vector2& a, const Vector2& b, float epsilon)
     return Math::nearlyEqual(a.x, b.x, epsilon) && Math::nearlyEqual(a.y, b.y, epsilon);
 }
 
+bool Vector2::nearlyEqual(const Vector2& a, const float& value, float epsilon)
+{
+    return Math::nearlyEqual(a.x, value, epsilon) && Math::nearlyEqual(a.y, value, epsilon);
+}
+
 Vector2 Vector2::findCenterPoint(std::vector<Vector2>& vertices)
 {
     Vector2 center;
