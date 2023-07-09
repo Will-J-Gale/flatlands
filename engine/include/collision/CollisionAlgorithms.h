@@ -763,7 +763,7 @@ namespace CollisionAlgorithms
 
         //Check if closest edge is parallel as this will create 2 contacts
         float edgeSimilarity = std::abs(Vector2::dot(capsuleLineDir, edgeDir));
-        if(edgeSimilarity == 1.0f)
+        if(Math::nearlyEqual(edgeSimilarity, 1e-7))
         {
             float capsuleLineLength = Vector2::distanceSquared(centerLine.start, centerLine.end);
             float edgeLength = Vector2::distanceSquared(closestEdge.start, closestEdge.end);
