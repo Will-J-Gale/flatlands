@@ -138,10 +138,10 @@ void DemoApp::run()
         //     accumulator -= TIME_STEP;
         // }
 
-        world.step(frameTime);
+        world.Step(frameTime);
 
         Timer::stop("App Loop");
-        renderer.render(entities, world.getCollisions(), world.getMetrics());
+        renderer.render(entities, world.GetCollisions(), world.GetMetrics());
     }
 }
 
@@ -159,7 +159,7 @@ void DemoApp::createCircle(float radius, Vector2 position, float mass, float res
     entity->collider = circleCollider;
 
     entities.push_back(entity);
-    world.addRigidBody(rigidBody.get());
+    world.AddRigidBody(rigidBody.get());
 }
 
 void DemoApp::createLine(Vector2 start, Vector2 end, bool isStatic)
@@ -176,7 +176,7 @@ void DemoApp::createLine(Vector2 start, Vector2 end, bool isStatic)
     entity->collider = lineCollider;
     
     entities.push_back(entity);
-    world.addRigidBody(rigidBody.get());
+    world.AddRigidBody(rigidBody.get());
 }
 
 void DemoApp::createBox(Vector2 position, float width, float height, float rotation, float mass, float restitution, bool isStatic)
@@ -194,7 +194,7 @@ void DemoApp::createBox(Vector2 position, float width, float height, float rotat
     entity->collider = boxCollider;
 
     entities.push_back(entity);
-    world.addRigidBody(rigidBody.get());
+    world.AddRigidBody(rigidBody.get());
 }
 
 void DemoApp::createNGon(Vector2 position, float radius, size_t numSides, float mass, float restitution, bool isStatic)
@@ -227,7 +227,7 @@ void DemoApp::createNGon(Vector2 position, float radius, size_t numSides, float 
     entity->collider = polygonCollider;
 
     entities.push_back(entity);
-    world.addRigidBody(rigidBody.get());
+    world.AddRigidBody(rigidBody.get());
 }
 
 void DemoApp::createCapsule(Vector2 position, float width, float height, float rotation, float mass, float restitution, bool isStatic)
@@ -245,5 +245,5 @@ void DemoApp::createCapsule(Vector2 position, float width, float height, float r
     entity->collider = polygonCollider;
 
     entities.push_back(entity);
-    world.addRigidBody(rigidBody.get());
+    world.AddRigidBody(rigidBody.get());
 }

@@ -279,7 +279,6 @@ void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider
 
     Vector2 capsuleLineDir = (centerLine.end - centerLine.start).normalize();
     Vector2 edgeDir = (closestEdge.end - closestEdge.start).normalize();
-    // loginfo(Vector2::dot(capsuleLineDir, edgeDir));
 
     drawList->AddCircleFilled(toImVec2(closestProjection.projectedPoint), 3.0f, GREEN);
     drawList->AddLine(toImVec2(closestProjection.vertex), toImVec2(closestProjection.projectedPoint), GREEN);

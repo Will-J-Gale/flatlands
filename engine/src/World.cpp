@@ -15,7 +15,7 @@ World::World(Vector2 gravity, int numIterations)
     collisions = std::vector<Collision>();
 }
 
-void World::step(float dt)
+void World::Step(float dt)
 {
     metrics.reset();
     metrics.numEntities = bodies.size();
@@ -24,22 +24,25 @@ void World::step(float dt)
     float dtFraction = dt / numIterations;
     for(int i = 0; i < numIterations; i++)
     {
-        subStep(dtFraction);
+        SubStep(dtFraction);
     }
 
     metrics.worldStepTime = Time::time() - stepStart;
 }
 
-void World::subStep(float dt)
+void World::SubStep(float dt)
 {
     collisions.clear();
-    moveRigidBodies(dt);
-    std::vector<PotentialCollisionPair> potentialCollisions = broadPhaseDetection();
-    narrowPhaseDetection(potentialCollisions);
-    resolveCollisions();
+    MoveRigidBodies(dt);
+    BroadPhaseResult broadPhaseResult = broadPhase(bodies);
+    NarrowPhaseDetection(broadPhaseResult.potentialCollisions);
+    ResolveCollisions();
+
+    metrics.broadPhaseChecks += broadPhaseResult.numChecks;
+    metrics.broadPhaseTime += broadPhaseResult.timeTaken;
 }
 
-void World::moveRigidBodies(float dt)
+void World::MoveRigidBodies(float dt)
 {
     double moveBodiesStart = Time::time();
 
@@ -61,35 +64,7 @@ void World::moveRigidBodies(float dt)
     metrics.moveBodiesTime += Time::time() - moveBodiesStart;
 }
 
-std::vector<PotentialCollisionPair> World::broadPhaseDetection()
-{
-    double broadPhaseStart = Time::time();
-    std::vector<PotentialCollisionPair> potentialCollisions;
-
-    for(int i = 0; i < bodies.size(); i++)
-    {
-        for(int j = 0; j < bodies.size(); j++)
-        {
-            if(i == j || j < i)
-                continue;
-
-            metrics.broadPhaseChecks += 1;
-
-            RigidBody* a = bodies[i];
-            RigidBody* b = bodies[j];
-            AABBCollider aAABB = a->collider->GetAABB(&a->transform);
-            AABBCollider bAABB = b->collider->GetAABB(&b->transform);
-
-            if(CollisionAlgorithms::TestAABBCollision(&aAABB, &bAABB))
-                potentialCollisions.emplace_back(a, b);
-        }
-    }
-
-    metrics.broadPhaseTime += Time::time() - broadPhaseStart;
-
-    return potentialCollisions;
-}
-void World::narrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCollisions)
+void World::NarrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCollisions)
 {
     double narrowPhaseStart = Time::time();
     for(PotentialCollisionPair& potentialCollision : potentialCollisions)
@@ -131,7 +106,7 @@ void World::narrowPhaseDetection(std::vector<PotentialCollisionPair> potentialCo
     metrics.narrowPhaseTime += Time::time() - narrowPhaseStart;
 }
 
-void World::resolveCollisions()
+void World::ResolveCollisions()
 {
     double resolveCollisionsStart = Time::time();
     //Resolve collisions
@@ -267,17 +242,22 @@ void World::resolveCollisions()
     metrics.resolveCollisionsTime += Time::time() - resolveCollisionsStart;
 }
 
-void World::addRigidBody(RigidBody* rigidBody)
+void World::AddRigidBody(RigidBody* rigidBody)
 {
     bodies.push_back(rigidBody);
 }
 
-std::vector<RigidBody*> World::getBodies()
+std::vector<RigidBody*> World::GetBodies()
 {
     return bodies;
 }
 
-std::vector<Collision>* World::getCollisions()
+std::vector<Collision>* World::GetCollisions()
 {
     return &collisions;
+}
+
+void World::SetBroadPhase(BroadPhaseDetection broadPhase)
+{
+    this->broadPhase = broadPhase;
 }

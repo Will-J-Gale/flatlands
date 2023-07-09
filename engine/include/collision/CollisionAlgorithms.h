@@ -310,8 +310,6 @@ namespace CollisionAlgorithms
             collisionPoints.normal = normal;
             collisionPoints.depth = radiusSum - closestVertexProjection.distance;
             collisionPoints.hasCollisions = true;
-
-            loginfo(normal);
         }
 
         return collisionPoints;
