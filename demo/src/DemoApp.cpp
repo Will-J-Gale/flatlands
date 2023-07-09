@@ -94,34 +94,31 @@ void DemoApp::run()
 
         if(ImGui::IsMouseClicked(0))
         {
+            float radius = rand() % 50; 
+            createCircle(radius, renderer.getMousePosition(), 10.0f, 0.f);
+        }
+        else if(ImGui::IsMouseClicked(1))
+        {
+            float width = rand() % 50;
+            float height = rand() % 100;
+            createCapsule(renderer.getMousePosition(), width, height, 0.1, 10.0f, 0.01f);
+        }
+        else if(ImGui::IsMouseClicked(2))
+        {
             int r = rand() % 2;
 
             if(r == 0)
             {
-                float width = rand() % 50;
-                float height = rand() % 100;
-                createCapsule(renderer.getMousePosition(), width, height, 0.1, 10.0f, 0.01f);
+                float width = (rand() % 150) + 50.0f;
+                float height = (rand() % 150) + 50.0f;
+                createBox(renderer.getMousePosition(), width, height, 0.0f, 10.0f, 0.0f);
             }
             else
             {
-                float radius = rand() % 50; 
-                createCircle(radius, renderer.getMousePosition(), 10.0f, 0.f);
-                
+                float radius = rand() % 50;
+                int numSides = (rand() % 8) + 3;
+                createNGon(renderer.getMousePosition(), radius, numSides, 10.f, 0.0f);
             }
-        }
-        else if(ImGui::IsMouseClicked(1))
-        {
-            float width = (rand() % 150) + 50.0f;
-            float height = (rand() % 150) + 50.0f;
-            createBox(renderer.getMousePosition(), width, height, 0.0f, 10.0f, 0.0f);
-        }
-        else if(ImGui::IsMouseClicked(2))
-        {
-            float radius = rand() % 50;
-            int numSides = (rand() % 8) + 3;
-            // float radius = 50;
-            // int numSides = 5;
-            createNGon(renderer.getMousePosition(), radius, numSides, 10.f, 0.0f);
         }
 
         // entities[0]->rigidBody->addForce(force);
