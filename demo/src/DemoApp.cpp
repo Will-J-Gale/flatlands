@@ -28,8 +28,10 @@ void DemoApp::run()
     // createBox(Vector2(300 - 0, 300.0f), 400, 200, 0.0f, 100.0f, 0.0f);
     
     // createBox(Vector2(1200 - 10, 300.0f), 100, 200, 0.0f, 100.0f, 0.0f);
-    createCapsule(Vector2(300, 300), 20, 200, 0.1f, 10.0, 0.1f);
-    createCapsule(Vector2(300, 600), 100, 200, Math::PI / 2.0f, 10.0, 0.1f, true);
+    // createCapsule(Vector2(300, 300), 20, 200, 0.1f, 10.0, 0.1f);
+    // createCapsule(Vector2(300, 600), 100, 200, Math::PI / 2.0f, 10.0, 0.1f, true);
+
+    createCircle(50.0f, Vector2(400.0f, 100), 1.0f, 0.0f);
 
 
     // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
@@ -44,10 +46,12 @@ void DemoApp::run()
 
     // createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 100.0f, 0.0f);
 
-    // Static boxes
+    // Static elements
     createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
-    createBox(Vector2(200.0f, 200.0f), 1500, 20, 0.2f, 0.0f, 0.0f, true);
-    createBox(Vector2(1200.0f, 500.0f), 1500, 20, -0.2f, 0.0f, 0.0f, true);
+    createLine(Vector2(0, 150), Vector2(950, 350), true);
+    createLine(Vector2(1920, 350), Vector2(500, 650), true);
+    createLine(Vector2(0, 0), Vector2(0, 1080), true);
+    createLine(Vector2(1920, 0), Vector2(1920, 1080), true);
 
     // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
 
@@ -158,11 +162,13 @@ void DemoApp::createCircle(float radius, Vector2 position, float mass, float res
     world.addRigidBody(rigidBody.get());
 }
 
-void DemoApp::createLine(Vector2 position, float width, bool isStatic)
+void DemoApp::createLine(Vector2 start, Vector2 end, bool isStatic)
 {
-    std::shared_ptr<LineCollider> lineCollider = std::make_shared<LineCollider>(position, width);
+    std::shared_ptr<LineCollider> lineCollider = std::make_shared<LineCollider>(start, end);
     std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(lineCollider.get());
     rigidBody->setStatic(isStatic);
+
+    Vector2 position = start + ((end - start) / 2.0f);
     rigidBody->transform.position = position;
 
     std::shared_ptr<Entity> entity = std::make_shared<Entity>();

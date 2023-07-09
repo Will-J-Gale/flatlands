@@ -12,40 +12,27 @@ LineCollider::LineCollider()
 
 LineCollider::LineCollider(Vector2 position, float width)
 {
-    _width = width;
-    _start = Vector2(-width / 2.0f, 0.0f);
-    _end = Vector2(width / 2.0f, 0.0f);
 }
 
-std::vector<Vector2> LineCollider::transformPoints(Transform* transform)
+LineCollider::LineCollider(Vector2 start, Vector2 end)
 {
-    Vector2 position = transform->position;
-    float radians = transform->rotation;
-    std::vector<Vector2> points;
+    Vector2 center = start + ((end - start) / 2.0f);
+    line.start = start - center;
+    line.end = end - center;
 
-    Vector2 startRotated = _start.rotate(radians) + position;
-    Vector2 endRotated = _end.rotate(radians) + position;
-    points.push_back(endRotated);
-    points.push_back(startRotated);
-
-    return points;
+    this->setVertices({line.start, line.end});
 }
 
-
-AABBCollider LineCollider::GetAABB(Transform* transform)
+Line LineCollider::getLine()
 {
-    return AABBCollider();
+    return line;
 }
 
-Vector2 LineCollider::getAxis(float radians)
+Line LineCollider::transformLine(Transform* transform)
 {
-    Vector2 startRotated = _start.rotate(radians);
-    Vector2 endRotated = _end.rotate(radians);
+    Line transformedLine;
+    transformedLine.start = line.start.rotate(transform->rotation) + transform->position;
+    transformedLine.end = line.end.rotate(transform->rotation) + transform->position;
 
-    return endRotated - startRotated;
-}
-
-float LineCollider::GetRotationalInertia(float mass)
-{
-    return mass;
+    return transformedLine;
 }

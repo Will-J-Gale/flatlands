@@ -398,8 +398,8 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
         // drawCollisionDetection(drawList, entities);
 
-        auto a = entities[0];
-        auto b = entities[1];
+        // auto a = entities[0];
+        // auto b = entities[1];
         // drawCapsuleCapsuleCollisionTest(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (CapsuleCollider*)b->collider.get(), &b->rigidBody->transform);
 
         // drawCapsulePolygonCollision(drawList, (CapsuleCollider*)a->collider.get(), &a->rigidBody->transform, (ConvexPolygonCollider*)b->collider.get(), &b->rigidBody->transform);
@@ -496,8 +496,14 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
         Transform& transform = entity->rigidBody->transform;
         BoxCollider* boxCollider = (BoxCollider*) entity->collider.get();
         drawBox(drawList, boxCollider, &transform);
+    }
+    else if(dynamic_cast<LineCollider*>(entity->collider.get()))
+    {
+        Transform& transform = entity->rigidBody->transform;
+        LineCollider* lineCollider = dynamic_cast<LineCollider*>(entity->collider.get());
 
-        
+        Line line = lineCollider->transformLine(&transform);
+        drawList->AddLine(toImVec2(line.start), toImVec2(line.end), WHITE, 2.0f);
     }
     else if(dynamic_cast<ConvexPolygonCollider*>(entity->collider.get()))
     {

@@ -109,95 +109,6 @@ namespace CollisionAlgorithms
         return collisionPoints;
     }
 
-    inline CollisionPoints FindLineCircleCollisionPoints(
-        LineCollider* a, Transform* aTransform,
-        CircleCollider* b, Transform* bTransform)
-    {
-        CollisionPoints collisionPoints;
-
-        // Vector2 wallDirection = (a->end - a->start).normalize();
-        
-        // //Find closest point
-        // Vector2 circleToLineStart = a->start - bTransform->position;
-        // Vector2 circleToLineEnd = bTransform->position - a->end;
-        // Vector2 closestPoint;
-
-        // if(Vector2::dot(wallDirection, circleToLineStart) > 0)
-        //     closestPoint = a->start;
-        // else if(Vector2::dot(wallDirection, circleToLineEnd) > 0)
-        //     closestPoint = a->end;
-        // else
-        // {
-        //     float closestDist = Vector2::dot(wallDirection, circleToLineStart);
-        //     Vector2 closestVector = wallDirection * closestDist;
-
-        //     closestPoint = a->start - closestVector;
-        // }
-
-        // //Check if closest point is in circle
-        // Vector2 penetrationVector = bTransform->position - closestPoint; 
-        // float penetrationDepth = penetrationVector.magnitude();
-
-        // if(penetrationDepth <= b->radius)
-        // {
-        //     collisionPoints.hasCollisions = true;
-        //     collisionPoints.b = closestPoint;
-        //     collisionPoints.a = bTransform->position - (penetrationVector.normalize() * b->radius);
-        //     collisionPoints.normal = penetrationVector.normal();
-        //     collisionPoints.depth = Vector2::distance(collisionPoints.a, collisionPoints.b);
-        // }
-
-        return collisionPoints;
-    }
-
-    inline CollisionPoints FindLineLineCollisionPoints(
-        LineCollider* a, Transform* aTransform,
-        LineCollider* b, Transform* bTransform)
-    {
-        CollisionPoints collisionPoints;
-        collisionPoints.hasCollisions = true;
-        AxisProjection projection1, projection2;
-
-        auto aPoints = a->transformPoints(aTransform);
-        auto bPoints = b->transformPoints(bTransform);
-
-        auto aAxis = a->getAxis(aTransform->rotation).normal();
-        auto bAxis = b->getAxis(bTransform->rotation).normal();
-
-        //@TODO Duplicate code, refactorc
-        projection1 = projectShapeOntoAxis(aAxis, aPoints);
-        projection2 = projectShapeOntoAxis(aAxis, bPoints);
-        float overlap = std::min(projection1.max, projection2.max) - std::max(projection1.min, projection2.min);
-
-        if(overlap < 0)
-        {
-            collisionPoints.hasCollisions = false;
-            return collisionPoints;
-        }
-        
-        projection1 = projectShapeOntoAxis(bAxis, aPoints);
-        projection2 = projectShapeOntoAxis(bAxis, bPoints);
-        overlap = std::min(projection1.max, projection2.max) - std::max(projection1.min, projection2.min);
-
-        if(overlap < 0)
-        {
-            collisionPoints.hasCollisions = false;
-            return collisionPoints;
-        }
-
-        return collisionPoints;
-    }
-
-    inline CollisionPoints FindLineBoxCollisionPoints(
-        LineCollider* a, Transform* aTransform,
-        ConvexPolygonCollider* b, Transform* bTransform)
-    {
-        CollisionPoints collisionPoints;
-        
-
-        return collisionPoints;
-    }
-
     inline Vector2 getCenterPoint(std::vector<Vector2> vertices)
     {
         Vector2 center;
@@ -664,22 +575,6 @@ namespace CollisionAlgorithms
         collisionPoints->contacts.emplace_back(std::move(contactPoint));
     }
 
-    inline void GenerateCircleLineContactPoints(
-        CircleCollider* aCollider, Transform* aTransform, 
-        LineCollider* bCollider, Transform* bTransform,
-        CollisionPoints* collisionPoints)
-    {
-        
-    }
-
-    inline void GenerateBoxLineContactPoints(
-        ConvexPolygonCollider* aCollider, Transform* aTransform,
-        LineCollider* bCollider, Transform* bTransform,
-        CollisionPoints* collisionPoints)
-    {
-        
-    }
-
     inline void GenerateCircleCapsuleContactPoints(
         CircleCollider* a, Transform* aTransform,
         CapsuleCollider* b, Transform* bTransform,
@@ -824,7 +719,7 @@ namespace CollisionAlgorithms
             }
             else
             {
-                //@TODO 
+                throw std::runtime_error("Collider not handled");
             }
         }
         else if(aType == ColliderType::CIRCLE)
@@ -855,7 +750,7 @@ namespace CollisionAlgorithms
             }
             else
             {
-                //@TODO 
+                throw std::runtime_error("Collider not handled");
             }
         }
         else if(aType == ColliderType::CAPSULE)
@@ -887,7 +782,7 @@ namespace CollisionAlgorithms
         }
         else
         {
-            //@TODO 
+            throw std::runtime_error("Collider not handled");
         }
     }
 }

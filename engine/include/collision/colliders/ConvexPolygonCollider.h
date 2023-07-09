@@ -21,8 +21,7 @@ public:
     ColliderType GetType() override { return ColliderType::POLYGON; }
     virtual float GetRotationalInertia(float mass) override;
 
-private:
-private:
+protected:
     std::vector<Vector2> vertices;
 
 };
