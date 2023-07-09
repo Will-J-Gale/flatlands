@@ -5,6 +5,7 @@
 #include <collision/CollisionAlgorithms.h>
 #include <Constants.h>
 #include <core/Timer.h>
+#include <core/Metrics.h>
 
 inline static void glfw_error_callback(int error, const char* description)
 {
@@ -336,7 +337,7 @@ Renderer::~Renderer()
     destroy();
 }
 
-void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions)
+void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions, Metrics worldMetrics)
 {
     Timer::start("Render");
     bool show_demo_window = true;
@@ -431,6 +432,18 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
             text += std::to_string(timer.second.getDuration());
             ImGui::Text(text.c_str());
         }
+
+        ImGui::Separator();
+        ImGui::Text("World Metrics");
+        ImGui::Text(std::string("\tEntities: " + std::to_string(worldMetrics.numEntities)).c_str());
+        ImGui::Text(std::string("\tBroad phase checks: " + std::to_string(worldMetrics.broadPhaseChecks)).c_str());
+        ImGui::Text(std::string("\tNarrow phase checks: " + std::to_string(worldMetrics.narrowPhaseChecks)).c_str());
+        ImGui::Spacing();
+        ImGui::Text(std::string("\tStep time: " + std::to_string(worldMetrics.worldStepTime)).c_str());
+        ImGui::Text(std::string("\tMove bodies: " + std::to_string(worldMetrics.moveBodiesTime)).c_str());
+        ImGui::Text(std::string("\tBroad phase time: " + std::to_string(worldMetrics.broadPhaseTime)).c_str());
+        ImGui::Text(std::string("\tNarrow phase time: " + std::to_string(worldMetrics.narrowPhaseTime)).c_str());
+        ImGui::Text(std::string("\tResolve collisions: " + std::to_string(worldMetrics.resolveCollisionsTime)).c_str());
         ImGui::End();
     }
 

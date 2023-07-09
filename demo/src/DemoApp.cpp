@@ -141,7 +141,7 @@ void DemoApp::run()
         world.step(frameTime);
 
         Timer::stop("App Loop");
-        renderer.render(entities, world.getCollisions());
+        renderer.render(entities, world.getCollisions(), world.getMetrics());
     }
 }
 

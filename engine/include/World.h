@@ -5,6 +5,7 @@
 #include <Vector2.h>
 #include <collision/Collision.h>
 #include <collision/PotentialCollisionPair.h>
+#include <core/Metrics.h>
 
 class World
 {
@@ -14,6 +15,7 @@ public:
     void addRigidBody(RigidBody* rigidBody);
     std::vector<RigidBody*> getBodies();
     std::vector<Collision>* getCollisions();
+    Metrics getMetrics() { return metrics; }
     
 private:
     void subStep(float dt);
@@ -26,4 +28,6 @@ private:
     std::vector<Collision> collisions;
     Vector2 gravity;
     int numIterations = 1;
+
+    Metrics metrics;
 };

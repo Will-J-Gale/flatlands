@@ -16,6 +16,7 @@
 #include <Entity.h>
 #include <collision/Collision.h>
 #include <Constants.h>
+#include <core/Metrics.h>
 
 class Renderer
 {
@@ -23,7 +24,7 @@ public:
     Renderer();
     ~Renderer();
     
-    void render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions);
+    void render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions, Metrics worldMetrics);
     void destroy();
     bool running();
     void renderRigidBody(ImDrawList* drawList, const Entity* body);
