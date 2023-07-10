@@ -1,11 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <RigidBody.h>
 #include <Vector2.h>
 #include <collision/Collision.h>
 #include <collision/PotentialCollisionPair.h>
-#include <collision/BroadPhaseDetection.h>
+#include <collision/broadPhase/BroadPhaseDetection.h>
 #include <core/Metrics.h>
 
 class World
@@ -17,7 +18,7 @@ public:
     std::vector<RigidBody*> GetBodies();
     std::vector<Collision>* GetCollisions();
     Metrics GetMetrics() { return metrics; }
-    void SetBroadPhase(BroadPhaseDetection broadPhase);
+    void SetBroadPhase(std::unique_ptr<BroadPhaseDetection> broadPhase);
     
 private:
     void SubStep(float dt);
@@ -31,5 +32,5 @@ private:
     std::vector<Collision> collisions;
     Vector2 gravity;
     Metrics metrics;
-    BroadPhaseDetection broadPhase = BroadPhase::NaiveAABBDetection;
+    std::unique_ptr<BroadPhaseDetection> broadPhase = nullptr;
 };

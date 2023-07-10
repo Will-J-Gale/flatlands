@@ -15,6 +15,7 @@
 #include <core/Logger.h>
 #include <Vector2.h>
 #include <core/Timer.h>
+#include <collision/broadPhase/NaiveAABBDetection.h>
 
 DemoApp::DemoApp()
 {
@@ -22,6 +23,9 @@ DemoApp::DemoApp()
 
 void DemoApp::run()
 {
+    auto broadPhase = std::make_unique<NaiveAABBDetection>();
+    world.SetBroadPhase(std::move(broadPhase));
+
     // createBox(Vector2(600, 300), 100, 200, 0.0, 5.0, 0.1f);
     // createBox(Vector2(800, 300), 100, 200, 0.0, 5.0, 0.1f);
     // createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f);
