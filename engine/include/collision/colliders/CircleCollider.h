@@ -9,7 +9,7 @@ public:
     CircleCollider();
     CircleCollider(float radius);
 
-    AABBCollider GetAABB(Transform* transform) override;
+    AABB GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::CIRCLE; }
     float GetRotationalInertia(float mass) override;
     

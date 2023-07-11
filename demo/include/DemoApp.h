@@ -5,7 +5,7 @@
 #include <Constants.h>
 #include <RigidBody.h>
 #include <Renderer.h>
-#include <Vector2.h>
+#include <math/Vector2.h>
 #include <Entity.h>
 
 class DemoApp

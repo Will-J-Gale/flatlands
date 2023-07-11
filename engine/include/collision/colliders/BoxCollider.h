@@ -2,8 +2,8 @@
 #include <vector>
 #include <collision/colliders/ConvexPolygonCollider.h>
 #include <collision/CollisionPoints.h>
-#include <Vector2.h>
-#include <Line.h>
+#include <math/Vector2.h>
+#include <math/Line.h>
 
 class BoxCollider : public ConvexPolygonCollider
 {

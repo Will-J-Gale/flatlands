@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 #include <RigidBody.h>
-#include <Vector2.h>
+#include <math/Vector2.h>
 #include <collision/Collision.h>
 #include <collision/PotentialCollisionPair.h>
 #include <collision/broadPhase/BroadPhaseDetection.h>

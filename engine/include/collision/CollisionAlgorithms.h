@@ -5,8 +5,8 @@
 #include <collision/colliders/ConvexPolygonCollider.h>
 #include <collision/colliders/CapsuleCollider.h>
 #include <collision/Collision.h>
-#include <Vector2.h>
-#include <Line.h>
+#include <math/Vector2.h>
+#include <math/Line.h>
 #include <Transform.h>
 #include <core/Logger.h>
 #include <core/Math.h>
@@ -79,12 +79,22 @@ namespace CollisionAlgorithms
         return closestPoint;
     }
 
-    inline bool TestAABBCollision(AABBCollider* a, AABBCollider* b)
+    inline bool TestAABBCollision(const AABB* a, const AABB* b)
     {
         return a->max.x > b->min.x &&
 			a->min.x < b->max.x &&
 			a->max.y > b->min.y &&
 			a->min.y < b->max.y;
+    }
+
+    inline bool TestPointAABBCollision(const Vector2& p, const AABB& box)
+    {
+        return (
+            p.x >= box.min.x && 
+            p.x < box.max.x && 
+            p.y >= box.min.y && 
+            p.y < box.max.y
+        );
     }
 
     inline CollisionPoints TestCircleCircleCollision(

@@ -3,7 +3,7 @@
 
 #include <collision/colliders/ConvexPolygonCollider.h>
 #include <collision/CollisionPoints.h>
-#include <Line.h>
+#include <math/Line.h>
 
 class LineCollider : public ConvexPolygonCollider
 {

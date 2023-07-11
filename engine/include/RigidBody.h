@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Vector2.h>
+#include <math/Vector2.h>
 #include <Transform.h>
 #include <collision/colliders/Collider.h>
 #include <core/EngineConstants.h>

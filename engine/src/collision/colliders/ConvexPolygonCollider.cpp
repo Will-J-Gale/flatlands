@@ -122,7 +122,7 @@ std::vector<Line> ConvexPolygonCollider::getEdges(Transform* transform)
     return edges;
 }
 
-AABBCollider ConvexPolygonCollider::GetAABB(Transform* transform)
+AABB ConvexPolygonCollider::GetAABB(Transform* transform)
 {
     Vector2 min = Vector2(Math::FLOAT_MAX, Math::FLOAT_MAX);
     Vector2 max = Vector2(Math::FLOAT_MIN, Math::FLOAT_MIN);
@@ -144,7 +144,7 @@ AABBCollider ConvexPolygonCollider::GetAABB(Transform* transform)
             max.y = point.y;
     }
 
-    return AABBCollider(min, max);
+    return AABB(min, max);
 };
 
 float ConvexPolygonCollider::GetRotationalInertia(float mass)

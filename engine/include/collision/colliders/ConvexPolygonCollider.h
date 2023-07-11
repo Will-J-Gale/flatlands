@@ -3,8 +3,8 @@
 #include <Transform.h>
 #include <collision/colliders/Collider.h>
 #include <collision/CollisionPoints.h>
-#include <Vector2.h>
-#include <Line.h>
+#include <math/Vector2.h>
+#include <math/Line.h>
 
 class ConvexPolygonCollider : public Collider
 {
@@ -17,7 +17,7 @@ public:
     virtual std::vector<Vector2> getAxes(float radians);
     virtual std::vector<Line> getEdges(Transform* transform);
 
-    virtual AABBCollider GetAABB(Transform* transform) override;
+    virtual AABB GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::POLYGON; }
     virtual float GetRotationalInertia(float mass) override;
 

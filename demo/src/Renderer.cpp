@@ -6,6 +6,7 @@
 #include <Constants.h>
 #include <core/Timer.h>
 #include <core/Metrics.h>
+#include <collision/broadPhase/QuadTree.h>
 
 inline static void glfw_error_callback(int error, const char* description)
 {
@@ -371,11 +372,61 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
         mousePosition.x = mousePos.x + windowPos.x;
         mousePosition.y = mousePos.y + windowPos.y;
-        
+
+        float halfWidth = windowSize.x / 2.0f;
+        float halfHeight = windowSize.y / 2.0f;
+        AABB boundary = AABB(Vector2(0, 0), Vector2(windowSize.x, windowSize.y));
+        QuadTree quadTree = QuadTree(boundary, 4);
+
         for(std::shared_ptr<Entity>& entity : entities)
         {
             renderRigidBody(drawList, entity.get());
-        }       
+            quadTree.Insert(entity->rigidBody->transform.position);
+        }
+
+        auto boundsList = std::vector<AABB>();
+        quadTree.GetTreeBounds(&boundsList);
+
+        for(AABB& bounds : boundsList)
+        {
+            auto p1 = bounds.min;
+            auto p2 = Vector2(bounds.min.x + bounds.width, bounds.min.y);
+            auto p3 = bounds.max;
+            auto p4 = Vector2(bounds.min.x, bounds.min.y + bounds.height);
+
+            drawList->AddQuad(
+                toImVec2(p1),
+                toImVec2(p2),
+                toImVec2(p3),
+                toImVec2(p4), 
+                WHITE
+            );
+        }
+
+        float queryWidth = 50;
+        float queryHeight = 50;
+
+        AABB queryBox = AABB(
+            Vector2(mousePosition.x - queryWidth, mousePosition.y - queryHeight),
+            Vector2(mousePosition.x + queryWidth, mousePosition.y + queryHeight)
+        );
+
+        Vector2 p1(mousePosition.x - queryWidth, mousePosition.y - queryWidth);
+        drawList->AddQuad(
+            toImVec2(Vector2(mousePosition.x - queryWidth, mousePosition.y - queryWidth)),
+            toImVec2(Vector2(mousePosition.x + queryWidth, mousePosition.y - queryWidth)),
+            toImVec2(Vector2(mousePosition.x + queryWidth, mousePosition.y + queryWidth)),
+            toImVec2(Vector2(mousePosition.x - queryWidth, mousePosition.y + queryWidth)),
+            GREEN
+        );
+
+        std::vector<Vector2> points;
+        quadTree.Query(queryBox, &points);
+
+        for(Vector2& point : points)
+        {
+            drawList->AddCircleFilled(toImVec2(point), 10.0f, GREEN);
+        }
 
         if(renderDebug)
         {
@@ -479,7 +530,7 @@ void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
 
     if(renderDebug)
     {
-        AABBCollider aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
+        AABB aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
         drawAABB(drawList, &aabb, GREEN);
     }
 
@@ -588,7 +639,7 @@ void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transf
     );
 }
 
-void Renderer::drawAABB(ImDrawList* drawList, AABBCollider* aabb, ImU32 colour)
+void Renderer::drawAABB(ImDrawList* drawList, AABB* aabb, ImU32 colour)
 {
     float width = std::abs(aabb->max.x - aabb->min.x);
     float height = std::abs(aabb->max.y - aabb->min.y);

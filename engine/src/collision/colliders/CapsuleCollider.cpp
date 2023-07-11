@@ -20,12 +20,12 @@ CapsuleCollider::CapsuleCollider(float width, float height)
     };
 }
 
-AABBCollider CapsuleCollider::GetAABB(Transform* transform)
+AABB CapsuleCollider::GetAABB(Transform* transform)
 {
     Line transformedLine = GetCenterLine(transform);
     Vector2 start = transformedLine.start;
     Vector2 end = transformedLine.end;
-    AABBCollider aabb;
+    AABB aabb;
 
     aabb.min.x = std::min(start.x, end.x);
     aabb.min.y = std::min(start.y, end.y);

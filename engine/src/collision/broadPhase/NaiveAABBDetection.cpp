@@ -30,8 +30,8 @@ BroadPhaseResult NaiveAABBDetection::execute(const RigidBodies& bodies)
 
             result.numChecks += 1;
 
-            AABBCollider aAABB = a->collider->GetAABB(&a->transform);
-            AABBCollider bAABB = b->collider->GetAABB(&b->transform);
+            AABB aAABB = a->collider->GetAABB(&a->transform);
+            AABB bAABB = b->collider->GetAABB(&b->transform);
 
             if(CollisionAlgorithms::TestAABBCollision(&aAABB, &bAABB))
                 result.potentialCollisions.emplace_back(a, b);

@@ -12,7 +12,7 @@
 #include <collision/colliders/BoxCollider.h>
 #include <collision/colliders/ConvexPolygonCollider.h>
 #include <collision/colliders/CapsuleCollider.h>
-#include <Vector2.h>
+#include <math/Vector2.h>
 #include <Entity.h>
 #include <collision/Collision.h>
 #include <Constants.h>
@@ -42,7 +42,7 @@ private:
     void drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
     void drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform);
     void drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, ConvexPolygonCollider* b, Transform* bTransform);
-    void drawAABB(ImDrawList* drawList, AABBCollider* aabb, ImU32 colour=GREEN);
+    void drawAABB(ImDrawList* drawList, AABB* aabb, ImU32 colour=GREEN);
     
 private:
     GLFWwindow* window;

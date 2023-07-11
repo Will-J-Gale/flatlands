@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Transform.h>
-#include <collision/colliders/AABBCollider.h>
+#include <math/AABB.h>
 
 //Forward declarations
 class CollisionPoints;
@@ -20,7 +20,7 @@ class Collider
 {
 public:
     Collider(){};
-    virtual AABBCollider GetAABB(Transform* transform) = 0;
+    virtual AABB GetAABB(Transform* transform) = 0;
     virtual ColliderType GetType() = 0;
     virtual float GetRotationalInertia(float mass) = 0;
 };

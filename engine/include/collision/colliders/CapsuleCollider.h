@@ -3,8 +3,8 @@
 #include <Transform.h>
 #include <collision/colliders/Collider.h>
 #include <collision/CollisionPoints.h>
-#include <Vector2.h>
-#include <Line.h>
+#include <math/Vector2.h>
+#include <math/Line.h>
 
 class CapsuleCollider : public Collider
 {
@@ -12,7 +12,7 @@ public:
     CapsuleCollider(){};
     CapsuleCollider(float width, float height);
 
-    AABBCollider GetAABB(Transform* transform) override;
+    AABB GetAABB(Transform* transform) override;
     ColliderType GetType() override { return ColliderType::CAPSULE; }
     float GetRotationalInertia(float mass) override;
     float GetWidth();
