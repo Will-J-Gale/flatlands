@@ -1,35 +1,37 @@
 #include <stdio.h>
+#include <map>
 #include <Renderer.h>
 
 #include <core/Logger.h>
 #include <collision/CollisionAlgorithms.h>
 #include <Constants.h>
+#include <core/Time.h>
 #include <core/Timer.h>
 #include <core/Metrics.h>
 #include <collision/broadPhase/QuadTree.h>
 
-inline static void glfw_error_callback(int error, const char* description)
+inline static void glfw_error_callback(int error, const char *description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-void Renderer::drawCircleOnAxis(ImDrawList* drawList, Vector2 axis, float radius, Vector2 position)
+void Renderer::drawCircleOnAxis(ImDrawList *drawList, Vector2 axis, float radius, Vector2 position)
 {
     auto circleProjection = CollisionAlgorithms::projectCircleOnToAxis(radius, position, axis);
     drawList->AddCircleFilled(toImVec2(axis * circleProjection.min), 4.0f, RED);
     drawList->AddCircleFilled(toImVec2(axis * circleProjection.max), 7.0f, RED);
 }
 
-void Renderer::drawPolygonOnAxis(ImDrawList* drawList, Vector2 axis, std::vector<Vector2> vertices)
+void Renderer::drawPolygonOnAxis(ImDrawList *drawList, Vector2 axis, std::vector<Vector2> vertices)
 {
     auto polygonProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, vertices);
     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.min), 4.0f, GREEN);
-    drawList->AddCircleFilled(toImVec2(axis * polygonProjection.max), 7.0f, GREEN);   
+    drawList->AddCircleFilled(toImVec2(axis * polygonProjection.max), 7.0f, GREEN);
 }
-void Renderer::drawAxis(ImDrawList* drawList, Vector2 axis, float length)
+void Renderer::drawAxis(ImDrawList *drawList, Vector2 axis, float length)
 {
-    Vector2 positiveEnd = axis * length; 
-    Vector2 negativeEnd = -axis * length; 
+    Vector2 positiveEnd = axis * length;
+    Vector2 negativeEnd = -axis * length;
     drawList->AddLine(toImVec2(Vector2()), toImVec2(positiveEnd), BLUE, 2.0f);
     drawList->AddLine(toImVec2(Vector2()), toImVec2(negativeEnd), WHITE, 2.0f);
 }
@@ -49,11 +51,11 @@ void Renderer::drawAxis(ImDrawList* drawList, Vector2 axis, float length)
 //     // for(Vector2& axis : polyCollider->getAxes(transform.rotation))
 //     // {
 //     //     float axisLength = 1000.0f;
-//     //     Vector2 positiveEnd = axis * axisLength; 
-//     //     Vector2 negativeEnd = -axis * axisLength; 
+//     //     Vector2 positiveEnd = axis * axisLength;
+//     //     Vector2 negativeEnd = -axis * axisLength;
 //     //     drawList->AddLine(toImVec2(Vector2()), toImVec2(positiveEnd), BLUE, 2.0f);
 //     //     drawList->AddLine(toImVec2(Vector2()), toImVec2(negativeEnd), WHITE, 2.0f);
-        
+
 //     //     auto polygonProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, polyCollider->transformPoints(&transform));
 //     //     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.min), 4.0f, GREEN);
 //     //     drawList->AddCircleFilled(toImVec2(axis * polygonProjection.max), 7.0f, GREEN);
@@ -84,7 +86,7 @@ void Renderer::drawAxis(ImDrawList* drawList, Vector2 axis, float length)
 //             collisionPoints.hasCollisions = false;
 //             // return;
 //         }
-        
+
 //         // drawAxis(drawList, axis);
 //         // drawPolygonOnAxis(drawList, axis, aPoints);
 //         // drawCircleOnAxis(drawList, axis, circleCollider->radius, circleTransform->position);
@@ -132,8 +134,7 @@ void Renderer::drawAxis(ImDrawList* drawList, Vector2 axis, float length)
 
 // }
 
-
-void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::shared_ptr<Entity>>& entities)
+void Renderer::drawCollisionDetection(ImDrawList *drawList, std::vector<std::shared_ptr<Entity>> &entities)
 {
     // CapsuleCollider* b = dynamic_cast<CapsuleCollider*>(entities[0]->collider.get());
     // Transform* bTransform = &entities[0]->rigidBody->transform;
@@ -151,7 +152,7 @@ void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::sha
     //     Vector2 direction = aTransform->position - closestPoint;
     //     Vector2 contact = aTransform->position + (-direction.normalize() * a->radius);
     //     float depth = radiusSum - direction.magnitude();
-        
+
     //     // Vector2 normal = direction.normalize();
     //     Vector2 end = contact + (direction.normalize() * depth);
     //     drawList->AddLine(toImVec2(contact), toImVec2(end), RED, 2.0f);
@@ -161,12 +162,12 @@ void Renderer::drawCollisionDetection(ImDrawList* drawList, std::vector<std::sha
     //     newTransform.position += (-direction.normalize() * depth);
     //     drawCapsule(drawList, b, &newTransform, MAGENTA);
     // }
-    
+
     // drawList->AddLine(toImVec2(aTransform->position), toImVec2(closestPoint), GREEN);
     // drawList->AddCircleFilled(toImVec2(closestPoint), 5.0f, CYAN);
 }
 
-void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform)
+void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList *drawList, CapsuleCollider *a, Transform *aTransform, CapsuleCollider *b, Transform *bTransform)
 {
     Line aLine = a->GetCenterLine(aTransform);
     Line bLine = b->GetCenterLine(bTransform);
@@ -179,12 +180,12 @@ void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleColl
     ClosestVertexProjection closestProjection = closestVertexProjectionOnA;
     bool vertexIsA = false;
 
-    if(closestVertexProjectionOnB.distance < closestVertexProjectionOnA.distance)
+    if (closestVertexProjectionOnB.distance < closestVertexProjectionOnA.distance)
     {
         closestProjection = closestVertexProjectionOnB;
         vertexIsA = true;
     }
-    
+
     drawList->AddCircleFilled(toImVec2(closestProjection.vertex), 3.0f, MAGENTA);
     drawList->AddLine(toImVec2(closestProjection.projectedPoint), toImVec2(closestProjection.vertex), MAGENTA, 2.0f);
 
@@ -192,7 +193,7 @@ void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleColl
     float bRadius = b->GetWidth() / 2.0f;
     float radiusSum = aRadius + bRadius;
 
-    if(vertexIsA)
+    if (vertexIsA)
     {
         drawList->AddCircle(toImVec2(closestProjection.vertex), aRadius, RED);
         drawList->AddCircle(toImVec2(closestProjection.projectedPoint), bRadius, RED);
@@ -203,7 +204,7 @@ void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleColl
         drawList->AddCircle(toImVec2(closestProjection.projectedPoint), aRadius, RED);
     }
 
-    if(closestProjection.distance < radiusSum)
+    if (closestProjection.distance < radiusSum)
     {
         Vector2 normal = (closestProjection.projectedPoint - closestProjection.vertex).normalize();
 
@@ -221,7 +222,7 @@ void Renderer::drawCapsuleCapsuleCollisionTest(ImDrawList* drawList, CapsuleColl
     }
 }
 
-void Renderer::drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollider* a, Transform* aTransform, CapsuleCollider* b, Transform* bTransform)
+void Renderer::drawCircleCapsuleCollisionTest(ImDrawList *drawList, CircleCollider *a, Transform *aTransform, CapsuleCollider *b, Transform *bTransform)
 {
     float capsuleRadius = b->GetWidth() / 2.0f;
     Line capsuleCenterLine = b->GetCenterLine(bTransform);
@@ -229,12 +230,12 @@ void Renderer::drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollid
     float distanceToCircle = Vector2::distance(closestPoint, aTransform->position);
     float radiusSum = capsuleRadius + a->radius;
 
-    if(distanceToCircle <= radiusSum)
+    if (distanceToCircle <= radiusSum)
     {
         Vector2 direction = aTransform->position - closestPoint;
         Vector2 contact = aTransform->position + (-direction.normalize() * a->radius);
         float depth = radiusSum - direction.magnitude();
-        
+
         // Vector2 normal = direction.normalize();
         Vector2 end = contact + (direction.normalize() * depth);
         drawList->AddLine(toImVec2(contact), toImVec2(end), RED, 2.0f);
@@ -244,12 +245,12 @@ void Renderer::drawCircleCapsuleCollisionTest(ImDrawList* drawList, CircleCollid
         newTransform.position += (-direction.normalize() * depth);
         drawCapsule(drawList, b, &newTransform, MAGENTA);
     }
-    
+
     drawList->AddLine(toImVec2(aTransform->position), toImVec2(closestPoint), GREEN);
     drawList->AddCircleFilled(toImVec2(closestPoint), 5.0f, CYAN);
 }
 
-void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider* a, Transform* aTransform, ConvexPolygonCollider* b, Transform* bTransform)
+void Renderer::drawCapsulePolygonCollision(ImDrawList *drawList, CapsuleCollider *a, Transform *aTransform, ConvexPolygonCollider *b, Transform *bTransform)
 {
     float aRadius = a->GetWidth() / 2.0f;
     Line centerLine = a->GetCenterLine(aTransform);
@@ -261,17 +262,17 @@ void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider
     Line closestEdge = bEdges[0];
     float closestEdgeDistance = Math::FLOAT_MAX;
 
-    for(Line& edge : bEdges)
+    for (Line &edge : bEdges)
     {
         ClosestVertexProjection projection = edge.closestVertexOnLine(centerLineVertices);
 
-        if(projection.distance < closestProjection.distance)
+        if (projection.distance < closestProjection.distance)
             closestProjection = projection;
 
         Vector2 edgeCenter = edge.start + ((edge.end - edge.start) / 2.0f);
-        float edgeDistance = Vector2::distanceSquared(aTransform->position,  edgeCenter);
+        float edgeDistance = Vector2::distanceSquared(aTransform->position, edgeCenter);
 
-        if(edgeDistance < closestEdgeDistance)
+        if (edgeDistance < closestEdgeDistance)
         {
             closestEdge = edge;
             closestEdgeDistance = edgeDistance;
@@ -285,47 +286,50 @@ void Renderer::drawCapsulePolygonCollision(ImDrawList* drawList, CapsuleCollider
     drawList->AddLine(toImVec2(closestProjection.vertex), toImVec2(closestProjection.projectedPoint), GREEN);
     drawList->AddLine(toImVec2(closestEdge.start), toImVec2(closestEdge.end), GREEN);
 
-    if(closestProjection.distance < aRadius)
+    if (closestProjection.distance < aRadius)
     {
         Vector2 normal = (closestProjection.projectedPoint - closestProjection.vertex).normalize();
         float depth = aRadius - closestProjection.distance;
 
         Vector2 bodyDir = bTransform->position - aTransform->position;
-        if(Vector2::dot(bodyDir, normal) < 0)
+        if (Vector2::dot(bodyDir, normal) < 0)
             normal *= -1;
 
         Transform capsuleTransform = *aTransform;
         capsuleTransform.position -= normal * depth;
         drawCapsule(drawList, a, &capsuleTransform, BLUE);
-    }  
+    }
 }
 
 Renderer::Renderer()
 {
+    detection = std::make_shared<QuadTreeDetection>(AABB(Vector2(), Vector2(1920, 1080)), 4);
+
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return;
 
-    const char* glsl_version = "#version 130";
+    const char *glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     window = glfwCreateWindow(1920, 1080, "Flatlands", NULL, NULL);
-        
+
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -337,7 +341,7 @@ Renderer::~Renderer()
     destroy();
 }
 
-void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions, Metrics worldMetrics)
+void Renderer::render(std::vector<std::shared_ptr<Entity>> &entities, std::vector<Collision> *collisions, Metrics worldMetrics, QuadTree *quadTree)
 {
     Timer::start("Render");
     bool show_demo_window = true;
@@ -356,7 +360,7 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
     ImGui::NewFrame();
 
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-    
+
     // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
@@ -365,88 +369,67 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
         ImGui::Begin("World");
         windowSize = ImGui::GetWindowSize();
 
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImDrawList *drawList = ImGui::GetWindowDrawList();
 
         ImVec2 windowPos = ImGui::GetWindowPos();
         ImVec2 mousePos = ImGui::GetMousePos();
 
         mousePosition.x = mousePos.x + windowPos.x;
         mousePosition.y = mousePos.y + windowPos.y;
+        std::vector<RigidBody *> bodies;
 
-        float halfWidth = windowSize.x / 2.0f;
-        float halfHeight = windowSize.y / 2.0f;
-        AABB boundary = AABB(Vector2(0, 0), Vector2(windowSize.x, windowSize.y));
-        QuadTree quadTree = QuadTree(boundary, 4);
-
-        for(std::shared_ptr<Entity>& entity : entities)
+        for (std::shared_ptr<Entity> &entity : entities)
         {
             renderRigidBody(drawList, entity.get());
-            quadTree.Insert(entity->rigidBody->transform.position);
+            bodies.push_back(entity->rigidBody.get());
         }
 
-        auto boundsList = std::vector<AABB>();
-        quadTree.GetTreeBounds(&boundsList);
-
-        for(AABB& bounds : boundsList)
+        int cellSize = 100;
+        for (int i = 0; i < cellSize; i++)
         {
-            auto p1 = bounds.min;
-            auto p2 = Vector2(bounds.min.x + bounds.width, bounds.min.y);
-            auto p3 = bounds.max;
-            auto p4 = Vector2(bounds.min.x, bounds.min.y + bounds.height);
-
-            drawList->AddQuad(
-                toImVec2(p1),
-                toImVec2(p2),
-                toImVec2(p3),
-                toImVec2(p4), 
-                WHITE
-            );
-        }
-
-        float queryWidth = 50;
-        float queryHeight = 50;
-
-        AABB queryBox = AABB(
-            Vector2(mousePosition.x - queryWidth, mousePosition.y - queryHeight),
-            Vector2(mousePosition.x + queryWidth, mousePosition.y + queryHeight)
-        );
-
-        Vector2 p1(mousePosition.x - queryWidth, mousePosition.y - queryWidth);
-        drawList->AddQuad(
-            toImVec2(Vector2(mousePosition.x - queryWidth, mousePosition.y - queryWidth)),
-            toImVec2(Vector2(mousePosition.x + queryWidth, mousePosition.y - queryWidth)),
-            toImVec2(Vector2(mousePosition.x + queryWidth, mousePosition.y + queryWidth)),
-            toImVec2(Vector2(mousePosition.x - queryWidth, mousePosition.y + queryWidth)),
-            GREEN
-        );
-
-        std::vector<Vector2> points;
-        quadTree.Query(queryBox, &points);
-
-        for(Vector2& point : points)
-        {
-            drawList->AddCircleFilled(toImVec2(point), 10.0f, GREEN);
-        }
-
-        if(renderDebug)
-        {
-            for(Collision& collision : *collisions)
+            for (int j = 0; j < cellSize; j++)
             {
-                if(collision.collisionPoints.contacts.size() > 0)
-                {
-                    for(int i = 0; i < collision.collisionPoints.contacts.size(); i++)
-                    {
-                        Vector2 contact = collision.collisionPoints.contacts[i];
-                        drawList->AddCircleFilled(toImVec2(contact), 10.0f, RED);
+                int x = j * cellSize;
+                int y = i * cellSize;
 
-                        Vector2 frictionImpulse = collision.collisionPoints.frictionImpulses[i];
-                        Vector2 impulseEnd = contact + (frictionImpulse * 1);
-                        drawList->AddLine(toImVec2(contact), toImVec2(impulseEnd), MAGENTA, 5.0f);
-                    }
-                }
+                ImVec2 p1(x, y);
+                ImVec2 p2(x + cellSize, y);
+                ImVec2 p3(x + cellSize, y + cellSize);
+                ImVec2 p4(x, y + cellSize);
+
+                drawList->AddQuad(p1, p2, p3, p4, WHITE, 2.0f);
             }
         }
 
+        float size = 25;
+        AABB mouseAABB = AABB(
+            Vector2(mousePosition.x - size, mousePosition.y - size),
+            Vector2(mousePosition.x + size, mousePosition.y + size)
+        );
+
+        Vector2 topLeftGrid(
+            std::floor(mouseAABB.min.x / cellSize) * cellSize,
+            std::floor(mouseAABB.min.y / cellSize) * cellSize
+        );
+
+        Vector2 bottomRightGrid(
+            std::floor(mouseAABB.max.x / cellSize) * cellSize,
+            std::floor(mouseAABB.max.y / cellSize) * cellSize
+        );
+
+        for(size_t x = topLeftGrid.x; x <= bottomRightGrid.x; x += cellSize)
+        {
+            for(size_t y = topLeftGrid.y; y <= bottomRightGrid.y; y += cellSize)
+            {
+                AABB cell = AABB(
+                    Vector2(x, y),
+                    Vector2(x + cellSize, y + cellSize)
+                );
+                drawAABB(drawList, &cell, WHITE_A);
+            }
+        }
+
+        drawAABB(drawList, &mouseAABB, WHITE);
         // drawCollisionDetection(drawList, entities);
 
         // auto a = entities[0];
@@ -464,7 +447,7 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
 
     Timer::stop("Render");
     {
-        ImGui::Begin("Debug");                          // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Debug"); // Create a window called "Hello, world!" and append into it.
 
         ImGui::Checkbox("Render debug", &renderDebug);
         ImGui::Spacing();
@@ -472,9 +455,9 @@ void Renderer::render(std::vector<std::shared_ptr<Entity>>& entities, std::vecto
         ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::Text("Entities: %li", entities.size());
         ImGui::Spacing();
-        
+
         ImGui::Text("Timings");
-        for(std::pair<std::string, Timespan> timer : Timer::timers)
+        for (std::pair<std::string, Timespan> timer : Timer::timers)
         {
             std::string text;
             text += timer.first;
@@ -519,66 +502,66 @@ ImVec2 Renderer::toImVec2(Vector2 v)
 
     return ImVec2(v.x, v.y);
 }
-void Renderer::renderRigidBody(ImDrawList* drawList, const Entity* entity)
+void Renderer::renderRigidBody(ImDrawList *drawList, const Entity *entity)
 {
-    RigidBody* rigidBody = entity->rigidBody.get();
-    Collider* collider = entity->rigidBody->collider;
-    Transform* transform = &entity->rigidBody->transform;
+    RigidBody *rigidBody = entity->rigidBody.get();
+    Collider *collider = entity->rigidBody->collider;
+    Transform *transform = &entity->rigidBody->transform;
     Vector2 pos = transform->position;
     float rotation = transform->rotation;
     ImU32 bodyColour = rigidBody->isAwake ? WHITE : WHITE_A;
 
-    if(renderDebug)
+    if (renderDebug)
     {
         AABB aabb = entity->collider->GetAABB(&entity->rigidBody->transform);
         drawAABB(drawList, &aabb, GREEN);
     }
 
-    if(dynamic_cast<CircleCollider*>(collider))
+    if (dynamic_cast<CircleCollider *>(collider))
     {
-        CircleCollider* circleCollider = (CircleCollider*)collider;
+        CircleCollider *circleCollider = (CircleCollider *)collider;
         float radius = circleCollider->radius;
-        Vector2 dir = Vector2(radius * std::cos(rotation), radius *std::sin(rotation));
+        Vector2 dir = Vector2(radius * std::cos(rotation), radius * std::sin(rotation));
 
         drawList->AddCircleFilled(toImVec2(pos), radius, bodyColour);
         drawList->AddLine(toImVec2(pos), toImVec2(pos + dir), BLACK);
     }
 
-    else if(dynamic_cast<LineCollider*>(collider))
+    else if (dynamic_cast<LineCollider *>(collider))
     {
-        LineCollider* lineCollider = (LineCollider*)collider;
-        std::vector<Vector2> points = lineCollider->transformPoints(transform); 
+        LineCollider *lineCollider = (LineCollider *)collider;
+        std::vector<Vector2> points = lineCollider->transformPoints(transform);
 
         drawList->AddLine(toImVec2(points[0]), toImVec2(points[1]), bodyColour);
     }
-    else if(dynamic_cast<BoxCollider*>(collider))
+    else if (dynamic_cast<BoxCollider *>(collider))
     {
-        BoxCollider* boxCollider = (BoxCollider*)collider;
+        BoxCollider *boxCollider = (BoxCollider *)collider;
         drawBox(drawList, boxCollider, transform, bodyColour);
     }
-    else if(dynamic_cast<LineCollider*>(collider))
+    else if (dynamic_cast<LineCollider *>(collider))
     {
-        LineCollider* lineCollider = dynamic_cast<LineCollider*>(collider);
+        LineCollider *lineCollider = dynamic_cast<LineCollider *>(collider);
         Line line = lineCollider->transformLine(transform);
         drawList->AddLine(toImVec2(line.start), toImVec2(line.end), bodyColour, 2.0f);
     }
-    else if(dynamic_cast<ConvexPolygonCollider*>(collider))
+    else if (dynamic_cast<ConvexPolygonCollider *>(collider))
     {
-        ConvexPolygonCollider* polyCollider = dynamic_cast<ConvexPolygonCollider*>(collider);
+        ConvexPolygonCollider *polyCollider = dynamic_cast<ConvexPolygonCollider *>(collider);
 
         std::vector<Vector2> vertices = polyCollider->transformPoints(transform);
         std::vector<ImVec2> pointsToDraw;
 
-        for(size_t i = 0; i < vertices.size(); i++)
+        for (size_t i = 0; i < vertices.size(); i++)
         {
             pointsToDraw.push_back(std::move(toImVec2(vertices[i])));
         };
 
         drawList->AddConvexPolyFilled(&pointsToDraw[0], vertices.size(), bodyColour);
     }
-    else if(dynamic_cast<CapsuleCollider*>(collider))
+    else if (dynamic_cast<CapsuleCollider *>(collider))
     {
-        CapsuleCollider* capsuleCollider = dynamic_cast<CapsuleCollider*>(collider);
+        CapsuleCollider *capsuleCollider = dynamic_cast<CapsuleCollider *>(collider);
 
         drawCapsule(drawList, capsuleCollider, transform, bodyColour);
     }
@@ -605,7 +588,7 @@ Vector2 Renderer::getMousePosition()
     return mousePosition;
 }
 
-void Renderer::drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Transform* transform, ImU32 colour)
+void Renderer::drawCapsule(ImDrawList *drawList, CapsuleCollider *capsule, Transform *transform, ImU32 colour)
 {
     Vector2 position = transform->position;
     float radius = capsule->GetWidth() / 2.0f;
@@ -623,11 +606,10 @@ void Renderer::drawCapsule(ImDrawList* drawList, CapsuleCollider* capsule, Trans
         toImVec2(Vector2(radius, -boxHeight).rotate(transform->rotation) + transform->position),
         toImVec2(Vector2(radius, boxHeight).rotate(transform->rotation) + transform->position),
         toImVec2(Vector2(-radius, boxHeight).rotate(transform->rotation) + transform->position),
-        colour
-    );
+        colour);
 }
 
-void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transform, ImU32 colour)
+void Renderer::drawBox(ImDrawList *drawList, BoxCollider *box, Transform *transform, ImU32 colour)
 {
     auto points = box->transformPoints(transform);
     drawList->AddQuadFilled(
@@ -635,11 +617,10 @@ void Renderer::drawBox(ImDrawList* drawList, BoxCollider* box, Transform* transf
         toImVec2(points[1]),
         toImVec2(points[2]),
         toImVec2(points[3]),
-        colour
-    );
+        colour);
 }
 
-void Renderer::drawAABB(ImDrawList* drawList, AABB* aabb, ImU32 colour)
+void Renderer::drawAABB(ImDrawList *drawList, AABB *aabb, ImU32 colour)
 {
     float width = std::abs(aabb->max.x - aabb->min.x);
     float height = std::abs(aabb->max.y - aabb->min.y);
@@ -648,6 +629,5 @@ void Renderer::drawAABB(ImDrawList* drawList, AABB* aabb, ImU32 colour)
         toImVec2(aabb->min + Vector2(width, 0)),
         toImVec2(aabb->max),
         toImVec2(aabb->min + Vector2(0, height)),
-        GREEN
-    );
+        GREEN);
 }

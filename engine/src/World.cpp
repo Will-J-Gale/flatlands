@@ -34,7 +34,7 @@ void World::SubStep(float dt)
 {
     collisions.clear();
     MoveRigidBodies(dt);
-    BroadPhaseResult broadPhaseResult = broadPhase->execute(bodies);
+    BroadPhaseResult broadPhaseResult = broadPhase->Execute(bodies);
     NarrowPhaseDetection(broadPhaseResult.potentialCollisions);
     ResolveCollisions();
 
@@ -270,7 +270,7 @@ std::vector<Collision>* World::GetCollisions()
     return &collisions;
 }
 
-void World::SetBroadPhase(std::unique_ptr<BroadPhaseDetection> broadPhase)
+void World::SetBroadPhase(std::shared_ptr<BroadPhaseDetection> broadPhase)
 {
-    this->broadPhase = std::move(broadPhase);
+    this->broadPhase = broadPhase;
 }

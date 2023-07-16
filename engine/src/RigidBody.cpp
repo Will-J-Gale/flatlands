@@ -1,15 +1,17 @@
 #include <cmath>
+#include <sstream>
 #include "RigidBody.h"
 #include "core/Logger.h"
 
 RigidBody::RigidBody()
 {
-    
+    this->GenerateHash();
 }
 
 RigidBody::RigidBody(Collider* collider)
 {
     this->collider = collider;
+    this->GenerateHash();
 }
 
 RigidBody::RigidBody(Collider* collider,  float mass, float friction, float elasticity, bool isStatic)
@@ -19,6 +21,14 @@ RigidBody::RigidBody(Collider* collider,  float mass, float friction, float elas
     // this->setFriction(friction);
     this->SetStatic(isStatic);
     this->SetRestitution(elasticity);
+    this->GenerateHash();
+}
+
+void RigidBody::GenerateHash()
+{
+    std::ostringstream addressStream;
+    addressStream << this;
+    this->hash = addressStream.str();
 }
 
 void RigidBody::AddCollider(Collider* collider)

@@ -12,11 +12,13 @@
 #include <collision/colliders/BoxCollider.h>
 #include <collision/colliders/ConvexPolygonCollider.h>
 #include <collision/colliders/CapsuleCollider.h>
+#include <collision/broadPhase/QuadTree.h>
 #include <math/Vector2.h>
 #include <Entity.h>
 #include <collision/Collision.h>
 #include <Constants.h>
 #include <core/Metrics.h>
+#include <collision/broadPhase/QuadTreeDetection.h>
 
 class Renderer
 {
@@ -24,7 +26,11 @@ public:
     Renderer();
     ~Renderer();
     
-    void render(std::vector<std::shared_ptr<Entity>>& entities, std::vector<Collision>* collisions, Metrics worldMetrics);
+    void render(
+        std::vector<std::shared_ptr<Entity>>& entities, 
+        std::vector<Collision>* collisions, 
+        Metrics worldMetrics,
+        QuadTree* quadTree=nullptr);
     void destroy();
     bool running();
     void renderRigidBody(ImDrawList* drawList, const Entity* body);
@@ -50,5 +56,6 @@ private:
     Vector2 mousePosition = Vector2(0,0);
     ImVec2 windowSize = ImVec2(0, 0);
     bool renderDebug = false;
+    std::shared_ptr<QuadTreeDetection> detection;
 
 };

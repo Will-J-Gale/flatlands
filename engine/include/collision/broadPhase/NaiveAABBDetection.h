@@ -6,5 +6,5 @@
 class NaiveAABBDetection : public BroadPhaseDetection
 {
 public:
-    BroadPhaseResult execute(const RigidBodies& bodies) override;
+    BroadPhaseResult Execute(RigidBodies& bodies) override;
 };

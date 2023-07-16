@@ -18,7 +18,7 @@ public:
     std::vector<RigidBody*> GetBodies();
     std::vector<Collision>* GetCollisions();
     Metrics GetMetrics() { return metrics; }
-    void SetBroadPhase(std::unique_ptr<BroadPhaseDetection> broadPhase);
+    void SetBroadPhase(std::shared_ptr<BroadPhaseDetection> broadPhase);
     
 private:
     void SubStep(float dt);
@@ -32,5 +32,5 @@ private:
     std::vector<Collision> collisions;
     Vector2 gravity;
     Metrics metrics;
-    std::unique_ptr<BroadPhaseDetection> broadPhase = nullptr;
+    std::shared_ptr<BroadPhaseDetection> broadPhase = nullptr;
 };

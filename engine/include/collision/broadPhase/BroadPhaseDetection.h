@@ -12,5 +12,5 @@ typedef std::vector<RigidBody*> RigidBodies;
 class BroadPhaseDetection
 {
 public:
-    virtual BroadPhaseResult execute(const RigidBodies& bodies) = 0;
+    virtual BroadPhaseResult Execute(RigidBodies& bodies) = 0;
 };

@@ -1,7 +1,7 @@
 #include <collision/broadPhase/NaiveAABBDetection.h>
 #include <collision/CollisionAlgorithms.h>
 
-BroadPhaseResult NaiveAABBDetection::execute(const RigidBodies& bodies)
+BroadPhaseResult NaiveAABBDetection::Execute(RigidBodies& bodies)
 {
     double start = Time::time();
     BroadPhaseResult result;

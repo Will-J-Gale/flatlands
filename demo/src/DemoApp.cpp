@@ -16,145 +16,33 @@
 #include <math/Vector2.h>
 #include <core/Timer.h>
 #include <collision/broadPhase/NaiveAABBDetection.h>
+#include <collision/broadPhase/QuadTreeDetection.h>
+#include <collision/broadPhase/SpatialHashDetection.h>
 
 DemoApp::DemoApp()
 {
 }
 
-// void DemoApp::run()
-// {
-//     auto broadPhase = std::make_unique<NaiveAABBDetection>();
-//     world.SetBroadPhase(std::move(broadPhase));
-
-//     // createBox(Vector2(600, 300), 100, 200, 0.0, 5.0, 0.1f);
-//     // createBox(Vector2(800, 300), 100, 200, 0.0, 5.0, 0.1f);
-//     // createCapsule(Vector2(820, 300), 100, 200, 10.0, 0.1f);
-//     // createBox(Vector2(300 - 0, 300.0f), 400, 200, 0.0f, 100.0f, 0.0f);
-    
-//     // createBox(Vector2(1200 - 10, 300.0f), 100, 200, 0.0f, 100.0f, 0.0f);
-//     // createCapsule(Vector2(300, 300), 20, 200, 0.1f, 10.0, 0.1f);
-//     // createCapsule(Vector2(300, 600), 100, 200, Math::PI / 2.0f, 10.0, 0.1f, true);
-
-//     // createCircle(50.0f, Vector2(400.0f, 100), 10.0f, 0.0f);
-
-
-//     // createBox(Vector2(200.0f, 0.0f), 50, 100, 0.0f, 100.0f, 0.0f, true);
-//     // createCircle(100.0f, Vector2(800.0f, 300), 1.0f, 0.0f, true);
-//     // createCircle(50.0f, Vector2(800.0f, 100), 1.0f, 0.0f);
-//     // createNGon(Vector2(0, 0), 50, 3, 10.f);
-//     // createCircle(100.0f, Vector2(100.0f, 100.0f), 1.0f, 0.0f, true);
-//     // createBox(Vector2(-200, 100.0f), 100, 100, 0.0f, 100.0f, 0.0f, true);
-
-//     // createLine(Vector2(100.0f, 100.0f), 100.0f);
-//     // createLine(Vector2(100.0f, 125.0f), 100.0f);
-
-//     // createBox(Vector2(100.0f, 100.0f), 200, 100, 0.0f, 100.0f, 0.0f);
-
-//     // Static elements
-//     createBox(Vector2(500.0f, 800.0f), 5000, 50, 0.0f, 0.0f, 0.0f, true);
-//     createLine(Vector2(0, 150), Vector2(950, 350), true);
-//     createLine(Vector2(1920, 350), Vector2(500, 650), true);
-//     createLine(Vector2(0, 0), Vector2(0, 1080), true);
-//     createLine(Vector2(1920, 0), Vector2(1920, 1080), true);
-
-//     // createCircle(20.0f, Vector2(200.0f, 300.1f), 0.0f, 0.0f);
-
-//     // float movementSpeed = 200.0f;
-//     // // float angularSpeed = 10000000.0f;
-
-//     float movementSpeed = 3.0f;
-//     float angularSpeed = 0.1f;
-    
-//     // entities[1]->rigidBody->addAngularForce(angularSpeed);
-    
-//     double currentTime = Time::time();
-//     double accumulator = 0.0f; 
-
-//     while (renderer.running())
-//     {
-//         Timer::start("App Loop");
-//         double newTime = Time::time();
-//         double frameTime = newTime - currentTime;
-//         currentTime = newTime;
-
-//         accumulator += frameTime;
-
-//         Vector2 force = Vector2(0,0);
-//         float angularForce = 0.0f;
-
-//         if(ImGui::IsKeyDown(ImGuiKey_A))
-//             force.x = -movementSpeed;
-        
-//         if(ImGui::IsKeyDown(ImGuiKey_D))
-//             force.x = movementSpeed;
-        
-//         if(ImGui::IsKeyDown(ImGuiKey_W))
-//             force.y = -movementSpeed;
-        
-//         if(ImGui::IsKeyDown(ImGuiKey_S))
-//             force.y = movementSpeed;
-
-//         if(ImGui::IsKeyDown(ImGuiKey_Q))
-//             angularForce = -angularSpeed;
-
-//         if(ImGui::IsKeyDown(ImGuiKey_E))
-//             angularForce = angularSpeed;
-
-//         if(ImGui::IsMouseClicked(0))
-//         {
-//             float radius = rand() % 50; 
-//             createCircle(radius, renderer.getMousePosition(), 10.0f, 0.f);
-//         }
-//         else if(ImGui::IsMouseClicked(1))
-//         {
-//             float width = rand() % 50;
-//             float height = rand() % 100;
-//             createCapsule(renderer.getMousePosition(), width, height, 0.1, 10.0f, 0.01f);
-//         }
-//         else if(ImGui::IsMouseClicked(2))
-//         {
-//             int r = rand() % 2;
-
-//             if(r == 0)
-//             {
-//                 float width = (rand() % 150) + 50.0f;
-//                 float height = (rand() % 150) + 50.0f;
-//                 createBox(renderer.getMousePosition(), width, height, 0.0f, 10.0f, 0.0f);
-//             }
-//             else
-//             {
-//                 float radius = rand() % 50;
-//                 int numSides = (rand() % 8) + 3;
-//                 createNGon(renderer.getMousePosition(), radius, numSides, 10.f, 0.0f);
-//             }
-//         }
-
-//         // entities[0]->rigidBody->addForce(force);
-//         // entities[0]->rigidBody->addAngularForce(angularForce);
-
-//         entities[0]->rigidBody->transform.position += force;
-//         entities[0]->rigidBody->transform.rotation += angularForce;
-
-//         // //Interesting way of doing fixed timesteps but becomes slugish after a while
-//         // while(accumulator > TIME_STEP)
-//         // {
-//         //     world.step(TIME_STEP);
-//         //     accumulator -= TIME_STEP;
-//         // }
-
-//         world.Step(frameTime);
-
-//         Timer::stop("App Loop");
-//         renderer.render(entities, world.GetCollisions(), world.GetMetrics());
-//     }
-// }
-
 void DemoApp::run()
 {
-    auto broadPhase = std::make_unique<NaiveAABBDetection>();
-    world.SetBroadPhase(std::move(broadPhase));
+    // auto broadPhase = std::make_shared<NaiveAABBDetection>();
+    // auto broadPhase = std::make_shared<QuadTreeDetection>(AABB(Vector2(0, 0), Vector2(1920, 1080)), 4);
+    auto broadPhase = std::make_shared<SpatialHashDetection>(100, 2000);
+    world.SetBroadPhase(broadPhase);
 
     double currentTime = Time::time();
+
+    float radius = rand() % 50; 
+    // createCircle(10, Vector2(960, 540), 10.0f, 0.f);
+    // createCircle(10, Vector2(920, 540), 10.0f, 0.f);
+
+    // // Static elements
+    // createBox(Vector2(500.0f, 200.0f), 100, 50, 0.0f, 0.0f, 0.0f, true);
+    // createBox(Vector2(800.0f, 800.0f), 1000, 50, 0.0f, 0.0f, 0.0f, true);
+    // createLine(Vector2(0, 150), Vector2(950, 350), true);
+    // createLine(Vector2(1920, 350), Vector2(500, 650), true);
+    // createLine(Vector2(0, 0), Vector2(0, 1080), true);
+    // createLine(Vector2(1920, 0), Vector2(1920, 1080), true);
 
     while (renderer.running())
     {
@@ -163,17 +51,77 @@ void DemoApp::run()
         double frameTime = newTime - currentTime;
         currentTime = newTime;
 
+        float movementSpeed = 20000.0f;
+
+        float angularSpeed = 10000000.0f;
+        // float movementSpeed = 3.0f;
+        // float angularSpeed = 0.1f;
+
+        Vector2 force = Vector2(0,0);
+        float angularForce = 0.0f;
+
+        if(ImGui::IsKeyDown(ImGuiKey_A))
+            force.x = -movementSpeed;
+    
+        if(ImGui::IsKeyDown(ImGuiKey_D))
+            force.x = movementSpeed;
+    
+        if(ImGui::IsKeyDown(ImGuiKey_W))
+            force.y = -movementSpeed;
+    
+        if(ImGui::IsKeyDown(ImGuiKey_S))
+            force.y = movementSpeed;
+
+        if(ImGui::IsKeyDown(ImGuiKey_Q))
+            angularForce = -angularSpeed;
+
+        if(ImGui::IsKeyDown(ImGuiKey_E))
+            angularForce = angularSpeed;
+
+        if(entities.size() > 0)
+        {
+            entities[0]->rigidBody->AddForce(force);
+            entities[0]->rigidBody->AddAngularForce(angularForce);
+            // entities[0]->rigidBody->transform.position += force;
+            // entities[0]->rigidBody->transform.rotation += angularForce;
+        }
+
+        // if(ImGui::IsMouseClicked(0))
         if(ImGui::IsMouseDown(0))
         {
-            float radius = rand() % 50; 
+            // float radius = rand() % 50; 
             createCircle(10, renderer.getMousePosition(), 10.0f, 0.f);
         }
 
-        // world.Step(frameTime);
+        if(ImGui::IsMouseClicked(1))
+        {
+            float r = rand() % 2;
+
+            if(r == 0)
+            {
+                float radius = (rand() % 45) + 10;
+                int numSides = (rand() % 5) + 3;
+                createNGon(renderer.getMousePosition(), radius, numSides, 10.0f);
+            }
+            else
+            {
+                float width = (rand() % 90) + 10;
+                float height = (rand() % 90) + 10;
+                createBox(renderer.getMousePosition(), width, height, 0.0f, 10.0f);
+            }
+        }
+        else if(ImGui::IsMouseClicked(2))
+        {
+            float width = (rand() % 90) + 10;
+            float height = (rand() % 90) + 10;
+            createCapsule(renderer.getMousePosition(), width, height, 0.0f, 10.0f);
+        }
+
+        world.Step(frameTime);
         world.GetBodies();
 
         Timer::stop("App Loop");
-        renderer.render(entities, world.GetCollisions(), world.GetMetrics());
+        renderer.render(entities, world.GetCollisions(), world.GetMetrics(), nullptr);
     }
 }
 

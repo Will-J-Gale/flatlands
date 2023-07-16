@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <math/Vector2.h>
 #include <Transform.h>
 #include <collision/colliders/Collider.h>
@@ -40,6 +41,10 @@ public:
     bool isStatic = false;
     float restitution = DEFAULT_RESTITUTION;
     bool isAwake = true;
+    std::string hash;
+
+private:
+    void GenerateHash();
 
 private:
     Vector2 previousPosition;
