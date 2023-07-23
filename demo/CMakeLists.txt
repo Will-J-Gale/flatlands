@@ -7,7 +7,7 @@ file(GLOB IMGUI_FILES
     "libs/imgui/*.cpp"
 )
 
-file(GLOB SRC_FILES
+file(GLOB_RECURSE SRC_FILES
     "src/*.cpp"
 )
 

@@ -3,5 +3,5 @@
 int main()
 {
     DemoApp app = DemoApp();
-    app.run();
+    app.Run();
 }

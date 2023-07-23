@@ -6,224 +6,128 @@
 #include <imgui.h>
 
 #include "DemoApp.h"
-#include <collision/colliders/CircleCollider.h>
-#include <collision/colliders/LineCollider.h>
-#include <collision/colliders/BoxCollider.h>
-#include <collision/colliders/ConvexPolygonCollider.h>
-#include <collision/colliders/CapsuleCollider.h>
 #include <core/Time.h>
 #include <core/Logger.h>
-#include <math/Vector2.h>
 #include <core/Timer.h>
-#include <collision/broadPhase/NaiveAABBDetection.h>
-#include <collision/broadPhase/QuadTreeDetection.h>
-#include <collision/broadPhase/SpatialHashDetection.h>
+#include <windows/collisionDetection/CapsuleCapsuleCollisionDetectionWindow.h>
+#include <windows/collisionDetection/CapsulePolygonCollisionDetectionWindow.h>
+#include <windows/collisionDetection/CircleCapsuleCollisionDetectionWindow.h>
+#include <windows/collisionDetection/CircleCircleCollisionDetectionWindow.h>
+#include <windows/collisionDetection/CirclePolygonCollisionDetectionWindow.h>
+
+
+inline static void glfw_error_callback(int error, const char *description)
+{
+    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
+
 
 DemoApp::DemoApp()
 {
+    demoSelectWindow.SetDemoSelectCallback(std::bind(&DemoApp::OnDemoSelected, this, std::placeholders::_1));
+
+    glfwSetErrorCallback(glfw_error_callback);
+    if (!glfwInit())
+        return;
+
+    const char *glsl_version = "#version 130";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+    window = glfwCreateWindow(1920, 1080, "Flatlands", NULL, NULL);
+
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-void DemoApp::run()
+void DemoApp::Destroy()
 {
-    // auto broadPhase = std::make_shared<NaiveAABBDetection>();
-    // auto broadPhase = std::make_shared<QuadTreeDetection>(AABB(Vector2(0, 0), Vector2(1920, 1080)), 4);
-    auto broadPhase = std::make_shared<SpatialHashDetection>(100, 2000);
-    world.SetBroadPhase(broadPhase);
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
-    double currentTime = Time::time();
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
 
-    float radius = rand() % 50; 
-    // createCircle(10, Vector2(960, 540), 10.0f, 0.f);
-    // createCircle(10, Vector2(920, 540), 10.0f, 0.f);
-
-    // // Static elements
-    // createBox(Vector2(500.0f, 200.0f), 100, 50, 0.0f, 0.0f, 0.0f, true);
-    // createBox(Vector2(800.0f, 800.0f), 1000, 50, 0.0f, 0.0f, 0.0f, true);
-    // createLine(Vector2(0, 150), Vector2(950, 350), true);
-    // createLine(Vector2(1920, 350), Vector2(500, 650), true);
-    // createLine(Vector2(0, 0), Vector2(0, 1080), true);
-    // createLine(Vector2(1920, 0), Vector2(1920, 1080), true);
-
-    while (renderer.running())
+void DemoApp::Run()
+{
+    while(!glfwWindowShouldClose(window))
     {
-        Timer::start("App Loop");
-        double newTime = Time::time();
-        double frameTime = newTime - currentTime;
-        currentTime = newTime;
+        Timer::start("Render");
+        bool show_demo_window = false;
+        ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
-        float movementSpeed = 20000.0f;
+        // Poll and handle events (inputs, window resize, etc.)
+        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
+        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
+        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+        glfwPollEvents();
 
-        float angularSpeed = 10000000.0f;
-        // float movementSpeed = 3.0f;
-        // float angularSpeed = 0.1f;
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
-        Vector2 force = Vector2(0,0);
-        float angularForce = 0.0f;
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-        if(ImGui::IsKeyDown(ImGuiKey_A))
-            force.x = -movementSpeed;
-    
-        if(ImGui::IsKeyDown(ImGuiKey_D))
-            force.x = movementSpeed;
-    
-        if(ImGui::IsKeyDown(ImGuiKey_W))
-            force.y = -movementSpeed;
-    
-        if(ImGui::IsKeyDown(ImGuiKey_S))
-            force.y = movementSpeed;
+        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+        
+        demoSelectWindow.Render();
 
-        if(ImGui::IsKeyDown(ImGuiKey_Q))
-            angularForce = -angularSpeed;
+        if(demoWindow != nullptr)
+            demoWindow->Render();
 
-        if(ImGui::IsKeyDown(ImGuiKey_E))
-            angularForce = angularSpeed;
+        // Rendering
+        ImGui::Render();
+        Timer::start("Render");
 
-        if(entities.size() > 0)
-        {
-            entities[0]->rigidBody->AddForce(force);
-            entities[0]->rigidBody->AddAngularForce(angularForce);
-            // entities[0]->rigidBody->transform.position += force;
-            // entities[0]->rigidBody->transform.rotation += angularForce;
-        }
+        Timer::start("Post-Render");
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        // if(ImGui::IsMouseClicked(0))
-        if(ImGui::IsMouseDown(0))
-        {
-            // float radius = rand() % 50; 
-            createCircle(10, renderer.getMousePosition(), 10.0f, 0.f);
-        }
-
-        if(ImGui::IsMouseClicked(1))
-        {
-            float r = rand() % 2;
-
-            if(r == 0)
-            {
-                float radius = (rand() % 45) + 10;
-                int numSides = (rand() % 5) + 3;
-                createNGon(renderer.getMousePosition(), radius, numSides, 10.0f);
-            }
-            else
-            {
-                float width = (rand() % 90) + 10;
-                float height = (rand() % 90) + 10;
-                createBox(renderer.getMousePosition(), width, height, 0.0f, 10.0f);
-            }
-        }
-        else if(ImGui::IsMouseClicked(2))
-        {
-            float width = (rand() % 90) + 10;
-            float height = (rand() % 90) + 10;
-            createCapsule(renderer.getMousePosition(), width, height, 0.0f, 10.0f);
-        }
-
-        world.Step(frameTime);
-        world.GetBodies();
-
-        Timer::stop("App Loop");
-        renderer.render(entities, world.GetCollisions(), world.GetMetrics(), nullptr);
+        glfwSwapBuffers(window);
+        Timer::stop("Post-Render");
     }
 }
 
-void DemoApp::createCircle(float radius, Vector2 position, float mass, float restitution, bool isStatic)
+void DemoApp::OnDemoSelected(Demo demo)
 {
-    std::shared_ptr<CircleCollider> circleCollider = std::make_shared<CircleCollider>(radius);
-    std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(circleCollider.get());
-    rigidBody->SetStatic(isStatic);
-    rigidBody->SetMass(mass);
-    rigidBody->SetRestitution(restitution);
-    rigidBody->transform.position.set(position); 
-
-    std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-    entity->rigidBody = rigidBody;
-    entity->collider = circleCollider;
-
-    entities.push_back(entity);
-    world.AddRigidBody(rigidBody.get());
-}
-
-void DemoApp::createLine(Vector2 start, Vector2 end, bool isStatic)
-{
-    std::shared_ptr<LineCollider> lineCollider = std::make_shared<LineCollider>(start, end);
-    std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(lineCollider.get());
-    rigidBody->SetStatic(isStatic);
-
-    Vector2 position = start + ((end - start) / 2.0f);
-    rigidBody->transform.position = position;
-
-    std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-    entity->rigidBody = rigidBody;
-    entity->collider = lineCollider;
-    
-    entities.push_back(entity);
-    world.AddRigidBody(rigidBody.get());
-}
-
-void DemoApp::createBox(Vector2 position, float width, float height, float rotation, float mass, float restitution, bool isStatic)
-{
-    std::shared_ptr<BoxCollider> boxCollider = std::make_shared<BoxCollider>(width, height);
-    std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(boxCollider.get());
-    rigidBody->transform.position = position;
-    rigidBody->transform.rotation = rotation;
-    rigidBody->SetMass(mass);
-    rigidBody->SetRestitution(restitution);
-    rigidBody->SetStatic(isStatic);
-
-    std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-    entity->rigidBody = rigidBody;
-    entity->collider = boxCollider;
-
-    entities.push_back(entity);
-    world.AddRigidBody(rigidBody.get());
-}
-
-void DemoApp::createNGon(Vector2 position, float radius, size_t numSides, float mass, float restitution, bool isStatic)
-{
-    float angle = 0;
-    float angleStep = (Math::PI * 2) / numSides;
-    std::vector<Vector2> vertices;
-
-    for(size_t i = 0; i < numSides; i++)
-    {
-        float offset = rand() % 50;
-
-        vertices.emplace_back(
-            std::cos(angle) * (radius + offset),
-            std::sin(angle) * (radius + offset)
-        );
-
-        angle += angleStep;
-    }
-
-    std::shared_ptr<ConvexPolygonCollider> polygonCollider = std::make_shared<ConvexPolygonCollider>(vertices);
-    std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(polygonCollider.get());
-    rigidBody->transform.position = position;
-    rigidBody->SetMass(mass);
-    rigidBody->SetRestitution(restitution);
-    rigidBody->SetStatic(isStatic);
-
-    std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-    entity->rigidBody = rigidBody;
-    entity->collider = polygonCollider;
-
-    entities.push_back(entity);
-    world.AddRigidBody(rigidBody.get());
-}
-
-void DemoApp::createCapsule(Vector2 position, float width, float height, float rotation, float mass, float restitution, bool isStatic)
-{
-    std::shared_ptr<CapsuleCollider> polygonCollider = std::make_shared<CapsuleCollider>(width, height);
-    std::shared_ptr<RigidBody> rigidBody = std::make_shared<RigidBody>(polygonCollider.get());
-    rigidBody->transform.position = position;
-    rigidBody->transform.rotation = rotation;
-    rigidBody->SetMass(mass);
-    rigidBody->SetRestitution(restitution);
-    rigidBody->SetStatic(isStatic);
-
-    std::shared_ptr<Entity> entity = std::make_shared<Entity>();
-    entity->rigidBody = rigidBody;
-    entity->collider = polygonCollider;
-
-    entities.push_back(entity);
-    world.AddRigidBody(rigidBody.get());
+    if(demo == Demo::PhysicsDemo)
+        demoWindow = std::make_unique<PhysicsDemoWindow>();
+    else if(demo == Demo::CircleCircle)
+        demoWindow = std::make_unique<CircleCircleCollisionDetectionWindow>();
+    else if(demo == Demo::CirclePolygon)
+        demoWindow = std::make_unique<CirclePolygonCollisionDetectionWindow>();
+    else if(demo == Demo::CapsulePolygon)
+        demoWindow = std::make_unique<CapsulePolygonCollisionDetectionWindow>();
+    else if(demo == Demo::CapsuleCircle)
+        demoWindow = std::make_unique<CircleCapsuleCollisionDetectionWindow>();
+    else if(demo == Demo::CapsuleCapsule)
+        demoWindow = std::make_unique<CapsuleCapsuleCollisionDetectionWindow>();
 }

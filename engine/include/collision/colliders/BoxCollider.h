@@ -8,6 +8,7 @@
 class BoxCollider : public ConvexPolygonCollider
 {
 public:
+    BoxCollider(){};
     BoxCollider(float width, float height);
     float GetRotationalInertia(float mass) override;
 

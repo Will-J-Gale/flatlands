@@ -1,27 +1,33 @@
 #pragma once
 
 #include <memory>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h>
+
 #include <World.h>
 #include <Constants.h>
 #include <RigidBody.h>
-#include <Renderer.h>
 #include <math/Vector2.h>
 #include <Entity.h>
+#include <windows/Window.h>
+#include <windows/PhysicsDemoWindow.h>
+#include <windows/DemoSelectWindow.h>
 
 class DemoApp
 {
 public:
     DemoApp();
-    void run();
+    void Run();
+    void Destroy();
 
 private:
-    void createCircle(float radius, Vector2 position, float mass=1.0f, float elasticity=1.0f, bool isStatic=false);
-    void createLine(Vector2 start, Vector2 end, bool isStatic=false);
-    void createBox(Vector2 position, float width, float height, float rotation=0.0f, float mass=1.0, float restitution=1.0, bool isStatic=false);
-    void createNGon(Vector2 position, float radius, size_t numSides, float mass=1.0f, float restitution=0.2f, bool isStatic=false);
-    void createCapsule(Vector2 position, float width, float height, float rotation=0.0f, float mass=1.0f, float restitution=0.2f, bool isStatic=false);
+    void OnDemoSelected(Demo demo);
 
-    Renderer renderer;
-    World world = World(GRAVITY, NUM_ITRERATIONS);
-    std::vector<std::shared_ptr<Entity>> entities;
+private:
+    GLFWwindow* window;
+    DemoSelectWindow demoSelectWindow;
+    std::unique_ptr<Window> demoWindow = std::make_unique<PhysicsDemoWindow>();
 };
