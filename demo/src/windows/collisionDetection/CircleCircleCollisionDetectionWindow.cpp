@@ -36,7 +36,7 @@ void CircleCircleCollisionDetectionWindow::Render()
         Vector2 resolvedCirclePos = mousePosition - (normal * penetrationDepth);
         Vector2 contact = resolvedCirclePos + (normal * mouseRadius);
         drawList->AddCircleFilled(toImVec2(contact), 5.0f, RED);
-        drawList->AddCircleFilled(toImVec2(resolvedCirclePos), mouseRadius, BLUE_A);
+        drawList->AddCircleFilled(toImVec2(resolvedCirclePos), mouseRadius, CYAN);
         
         //Draw normal + penetration depth
         Vector2 normalEnd = contact + (normal) * penetrationDepth;

@@ -55,7 +55,7 @@ void PhysicsDemoWindow::Render()
         if(r == 0)
         {
             float radius = (rand() % 45) + 10;
-            int numSides = (rand() % 5) + 3;
+            int numSides = (rand() % 5) + 20;
             CreateNGon(mousePosition, radius, numSides, 10.0f);
         }
         else

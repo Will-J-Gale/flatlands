@@ -41,12 +41,12 @@ void CirclePolygonCollisionDetectionWindow::Render()
     collisionPoints.depth = Math::FLOAT_MAX;
 
     //Get shape vertices
-    std::vector<Vector2> aPoints = b.transformPoints(&bTransform);
-    std::vector<Vector2> aAxes = b.getAxes(bTransform.rotation);
+    std::vector<Vector2> bPoints = b.transformPoints(&bTransform);
+    std::vector<Vector2> bAxes = b.getAxes(bTransform.rotation);
 
-    for(Vector2& axis : aAxes)
+    for(Vector2& axis : bAxes)
     {
-        auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, aPoints);
+        auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, bPoints);
         auto bProjection = CollisionAlgorithms::projectCircleOnToAxis(a.radius, aTransform.position, axis);
 
         Vector2 box_projection = bTransform.position + (axis * aProjection.min);
@@ -55,7 +55,7 @@ void CirclePolygonCollisionDetectionWindow::Render()
             collisionPoints.hasCollisions = false;
 
         DrawAxis(drawList, axis);
-        DrawPolygonOnAxis(drawList, axis, aPoints);
+        DrawPolygonOnAxis(drawList, axis, bPoints);
         DrawCircleOnAxis(drawList, axis, a.radius, aTransform.position);
 
         float axisDepth = std::min(bProjection.max - aProjection.min, aProjection.max - bProjection.min);
@@ -67,15 +67,15 @@ void CirclePolygonCollisionDetectionWindow::Render()
         }
     }
 
-    Vector2 closestVertex = CollisionAlgorithms::getClosestVertexToPoint(aTransform.position, aPoints);
+    Vector2 closestVertex = CollisionAlgorithms::getClosestVertexToPoint(aTransform.position, bPoints);
     Vector2 axis = (closestVertex - aTransform.position).normalize();
 
     drawList->AddCircleFilled(toImVec2(closestVertex), 10.0f, CYAN);
-    auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, aPoints);
+    auto aProjection = CollisionAlgorithms::projectShapeOntoAxis(axis, bPoints);
     auto bProjection = CollisionAlgorithms::projectCircleOnToAxis(a.radius, aTransform.position, axis);
 
     DrawAxis(drawList, axis);
-    DrawPolygonOnAxis(drawList, axis, aPoints);
+    DrawPolygonOnAxis(drawList, axis, bPoints);
     DrawCircleOnAxis(drawList, axis, a.radius, aTransform.position);
     drawList->AddLine(toImVec2(closestVertex), toImVec2(aTransform.position), GREEN);
 
@@ -89,19 +89,22 @@ void CirclePolygonCollisionDetectionWindow::Render()
         collisionPoints.depth = axisDepth;
         collisionPoints.normal = axis;
 
-        Vector2 centerA = CollisionAlgorithms::getCenterPoint(aPoints);
-        Vector2 dir = aTransform.position - centerA;
-
-        if(Vector2::dot(dir, collisionPoints.normal) < 0)
-            collisionPoints.normal *= -1;
+        
     }
 
     if(collisionPoints.hasCollisions)
     {
+        Vector2 dir = aTransform.position - bTransform.position;
+
+        if(Vector2::dot(dir, collisionPoints.normal) < 0)
+            collisionPoints.normal *= -1;
+
         Transform resolvedCollisionTranform = bTransform;
         resolvedCollisionTranform.position -= (collisionPoints.normal * collisionPoints.depth);
 
         DrawBox(drawList, &b, &resolvedCollisionTranform, CYAN_A);
+        Vector2 normalEnd = bTransform.position + (collisionPoints.normal * collisionPoints.depth);
+        drawList->AddLine(toImVec2(bTransform.position), toImVec2(normalEnd), GREEN, 2.0f);
     }
 
     ImGui::End();
